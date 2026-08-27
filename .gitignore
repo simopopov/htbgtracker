@@ -1,7 +1,35 @@
-__pycache__/
-*.pyc
-.venv/
+# --- Secrets & credentials — never commit these ---
 .env
-*.db
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+secrets*
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# --- Local data & debug artifacts ---
+*.db
+*.sqlite3
 debug_xml/
+backups/
+
+# --- Deploy / platform ---
+.vercel
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

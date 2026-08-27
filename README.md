@@ -1,11 +1,17 @@
 # HT Scout Bridge
 
-Coordination platform for national-team scouts and trainers (Bulgaria men's NT
-and U21, but country-agnostic by design). Replaces broadcast HT-mail searches
-with a targeted query: scouts see which trainers have money and slots; trainers
-see which players the scouts plan to bring to market and can raise a hand.
+[![CI](https://github.com/simopopov/htbgtracker/actions/workflows/ci.yml/badge.svg)](https://github.com/simopopov/htbgtracker/actions/workflows/ci.yml)
 
-Product spec: [PRODUCT.md](PRODUCT.md) · CHPP constraints: [CHPP_TECHNICAL.md](CHPP_TECHNICAL.md)
+Coordination platform for [Hattrick](https://www.hattrick.org) national-team
+scouts and trainers (Bulgaria men's NT and U21, but country-agnostic by
+design). Replaces broadcast HT-mail searches with a targeted query: scouts see
+which trainers have money and slots; trainers see which players the scouts
+plan to bring to market and can raise a hand.
+
+**Stack:** FastAPI · SQLAlchemy · Jinja2 · Postgres (Supabase) / SQLite ·
+deployed on Vercel. No JavaScript framework — server-rendered HTML.
+
+Product spec: [PRODUCT.md](PRODUCT.md) · CHPP constraints: [CHPP_TECHNICAL.md](CHPP_TECHNICAL.md) · Deployment: [DEPLOY.md](DEPLOY.md)
 
 ---
 
@@ -32,6 +38,11 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 # open http://localhost:8000 — pick a demo persona on the login page
 ```
+
+No configuration is needed for local development: mock mode is the default and
+the app runs entirely on bundled XML fixtures with a local SQLite database.
+For a real deployment, copy [.env.example](.env.example) to `.env` and fill it
+in — real secrets live only in the environment and are never committed.
 
 Tests: `pytest`
 
@@ -100,5 +111,14 @@ app/
   templates/   Jinja2 UI (EN/BG via app/i18n.py)
   models.py    facts vs intentions data model
   seed.py      demo data mirroring the fixtures
+api/           Vercel serverless entrypoint
+deploy/        self-hosted alternative (systemd + Caddy) and backup scripts
 tests/         parsers, matching/capacity logic, i18n coverage, e2e smoke
 ```
+
+## Deployment
+
+Production runs free-tier on **Vercel** (serverless FastAPI) + **Supabase**
+(Postgres), with GitHub Actions gating deploys, keeping the database warm and
+taking weekly backups. Step-by-step instructions: [DEPLOY.md](DEPLOY.md).
+A self-hosted variant (systemd + Caddy) lives in [deploy/](deploy/).

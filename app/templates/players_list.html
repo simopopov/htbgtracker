@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ T('players_title') }}</h1>
+  <a class="btn primary" href="/players/new">{{ T('players_add') }}</a>
+</div>
+
+<form method="get" action="/players" class="filters">
+  <label>{{ T('filter_status') }}
+    <select name="status">
+      <option value="">—</option>
+      {% for s in market_statuses %}
+      <option value="{{ s }}" {% if f_status == s %}selected{% endif %}>{{ T('status_' + s) }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>{{ T('filter_squad') }}
+    <select name="squad">
+      <option value="">—</option>
+      {% for s in nt_squads %}
+      <option value="{{ s }}" {% if f_squad == s %}selected{% endif %}>{{ T('squad_' + s) }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>{{ T('filter_skill') }}
+    <select name="skill">
+      <option value="">—</option>
+      {% for s in training_skills %}
+      <option value="{{ s }}" {% if f_skill == s %}selected{% endif %}>{{ T('skill_' + s) }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="btn" type="submit">{{ T('filter_apply') }}</button>
+</form>
+
+<table>
+  <tr>
+    <th>{{ T('th_player') }}</th>
+    <th>{{ T('age') }}</th>
+    <th>{{ T('filter_squad') }}</th>
+    <th>{{ T('th_target') }}</th>
+    <th>{{ T('price_est') }}</th>
+    <th>{{ T('th_status') }}</th>
+    <th>{{ T('th_claim') }}</th>
+    <th>{{ T('pd_interests_title') }}</th>
+    <th>{{ T('actions') }}</th>
+  </tr>
+  {% for r in rows %}
+  <tr>
+    <td><a href="/players/{{ r.player.id }}"><strong>{{ r.player.name or r.player.ht_player_id }}</strong></a></td>
+    <td>{% if r.player.age_years is not none %}{{ r.player.age_years }}.{{ r.player.age_days }}{% else %}—{% endif %}</td>
+    <td><span class="badge">{{ T('squad_' + r.player.squad) }}</span></td>
+    <td>{{ T('skill_' + r.player.target_skill) }}</td>
+    <td>{{ r.player.estimated_price|money }}</td>
+    <td><span class="badge status-{{ r.player.market_status }}">{{ T('status_' + r.player.market_status) }}</span>
+      {% if r.player.expected_listing %}<div class="muted small-text">{{ r.player.expected_listing|date }}</div>{% endif %}
+    </td>
+    <td>{% if r.claim %}{{ r.claim.scout.login_name }}{% else %}<span class="muted">{{ T('unclaimed') }}</span>{% endif %}</td>
+    <td>{% if r.open_interests %}{{ T('interests_n', n=r.open_interests) }}{% else %}<span class="muted">—</span>{% endif %}</td>
+    <td class="actions-cell">
+      <form method="post" action="/players/{{ r.player.id }}/quickstatus" class="inline">
+        <select name="market_status">
+          {% for s in market_statuses %}
+          <option value="{{ s }}" {% if r.player.market_status == s %}selected{% endif %}>{{ T('status_' + s) }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn small" type="submit">{{ T('save') }}</button>
+      </form>
+      <form method="post" action="/players/{{ r.player.id }}/delete" class="inline"
+            onsubmit="return confirm('{{ T('confirm_delete', name=(r.player.name or r.player.ht_player_id)) }}');">
+        <button class="btn small danger-btn" type="submit">{{ T('delete') }}</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>teamdetails.xml</FileName>
+  <Version>3.9</Version>
+  <UserID>201</UserID>
+  <FetchedDate>2026-08-03 08:00:00</FetchedDate>
+  <User>
+    <UserID>201</UserID>
+    <Loginname>BorkoTrainer</Loginname>
+    <SupporterTier>silver</SupporterTier>
+    <LastLoginDate>2026-08-02 21:14:00</LastLoginDate>
+  </User>
+  <Teams>
+    <Team>
+      <TeamID>1001</TeamID>
+      <TeamName>FC Vitosha 09</TeamName>
+      <IsPrimaryClub>True</IsPrimaryClub>
+      <League>
+        <LeagueID>50</LeagueID>
+        <LeagueName>Bulgaria</LeagueName>
+      </League>
+      <BotStatus>
+        <IsBot>False</IsBot>
+      </BotStatus>
+    </Team>
+  </Teams>
+</HattrickData>

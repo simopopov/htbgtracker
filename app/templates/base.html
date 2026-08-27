@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="{{ locale }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ settings.app_name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/">{{ settings.app_name }}</a>
+    {% set path = request.url.path %}
+    <nav>
+      {% if user %}
+        <a href="/" class="{{ 'on' if path == '/' else '' }}">{{ T('nav_dashboard') }}</a>
+        {% if is_scout %}
+          <a href="/players" class="{{ 'on' if path.startswith('/players') else '' }}">{{ T('nav_players') }}</a>
+          <a href="/trainers" class="{{ 'on' if path.startswith('/trainers') else '' }}">{{ T('nav_trainers') }}</a>
+        {% endif %}
+        <a href="/market" class="{{ 'on' if path.startswith('/market') else '' }}">{{ T('nav_market') }}</a>
+        <a href="/me" class="{{ 'on' if path.startswith('/me') else '' }}">{{ T('nav_my_team') }}</a>
+        {% if user.role in ('head_coach', 'master_scout') %}<a href="/admin" class="{{ 'on' if path.startswith('/admin') else '' }}">{{ T('nav_admin') }}</a>{% endif %}
+      {% endif %}
+    </nav>
+    <div class="topbar-right">
+      <a class="lang {% if locale == 'en' %}active{% endif %}" href="/lang/en">EN</a>
+      <a class="lang {% if locale == 'bg' %}active{% endif %}" href="/lang/bg">БГ</a>
+      {% if user %}
+        <span class="who">{{ user.login_name }} · {{ T('role_' + user.role) }}</span>
+        <a href="/logout">{{ T('nav_logout') }}</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+{% if settings.chpp_mock %}<div class="mockbar">{{ T('mock_banner') }}</div>{% endif %}
+{% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+<main>
+  {% block content %}{% endblock %}
+</main>
+<footer>{{ T('footer_note') }}</footer>
+<script>
+// Copy-to-clipboard for outreach drafts: the button copies the value of the
+// input/textarea that precedes it inside the same .draft-row.
+document.addEventListener('click', function (ev) {
+  var btn = ev.target.closest('.copy-btn');
+  if (!btn) return;
+  var row = btn.closest('.draft-row');
+  var field = row && row.querySelector('input, textarea');
+  if (!field) return;
+  navigator.clipboard.writeText(field.value).then(function () {
+    var original = btn.textContent;
+    btn.textContent = btn.dataset.done || original;
+    setTimeout(function () { btn.textContent = original; }, 1500);
+  });
+});
+</script>
+</body>
+</html>

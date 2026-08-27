@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>economy.xml</FileName>
+  <Version>1.4</Version>
+  <UserID>203</UserID>
+  <FetchedDate>2026-08-03 08:00:00</FetchedDate>
+  <Team>
+    <TeamID>1003</TeamID>
+    <Cash>750000</Cash>
+    <ExpectedCash>800000</ExpectedCash>
+  </Team>
+</HattrickData>

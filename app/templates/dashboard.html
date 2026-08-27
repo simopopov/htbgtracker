@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ T('dash_title') }}</h1>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n">{{ n_trainers }}</div><div class="stat-l">{{ T('dash_trainers_connected') }}</div></div>
+  <div class="stat"><div class="stat-n">{{ n_slots }}</div><div class="stat-l">{{ T('dash_open_slots') }}</div></div>
+  <div class="stat"><div class="stat-n">{{ n_players }}</div><div class="stat-l">{{ T('dash_players_tracked') }}</div></div>
+  <div class="stat"><div class="stat-n">{{ n_pipeline }}</div><div class="stat-l">{{ T('dash_pipeline') }}</div></div>
+</div>
+
+{% if is_scout %}
+  <section class="card">
+    <h2>{{ T('dash_open_interests') }}</h2>
+    {% if open_interests %}
+      <table>
+        <tr><th>{{ T('th_player') }}</th><th>{{ T('th_trainer') }}</th><th>{{ T('f_max_bid') }}</th><th>{{ T('notes') }}</th><th>{{ T('created') }}</th><th></th></tr>
+        {% for i in open_interests %}
+        <tr>
+          <td><a href="/players/{{ i.player.id }}">{{ i.player.name or i.player.ht_player_id }}</a></td>
+          <td>{{ i.profile.team_name }} ({{ i.profile.user.login_name }})</td>
+          <td>{% if i.max_bid %}{{ i.max_bid|money }}{% else %}—{% endif %}</td>
+          <td>{{ i.note }}</td>
+          <td>{{ i.created_at|date }}</td>
+          <td><a class="btn small" href="/players/{{ i.player.id }}">{{ T('view') }}</a></td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% else %}<p class="muted">{{ T('dash_none') }}</p>{% endif %}
+  </section>
+
+  <section class="card">
+    <h2>{{ T('dash_my_claims') }}</h2>
+    {% if my_claims %}
+      <ul>
+        {% for c in my_claims %}
+        <li><a href="/players/{{ c.player.id }}">{{ c.player.name or c.player.ht_player_id }}</a>
+            — {{ T('status_' + c.player.market_status) }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}<p class="muted">{{ T('dash_none') }}</p>{% endif %}
+  </section>
+{% endif %}
+
+{% if user.trainer_profile %}
+  <section class="card">
+    <h2>{{ T('dash_my_declarations') }}</h2>
+    {% if my_declarations %}
+      <ul>
+        {% for row in my_declarations %}
+        <li>
+          {{ T('skill_' + row.d.slot_type) if row.d.slot_type != 'any' else T('skill_any') }}
+          · {{ T('timing_' + row.d.timing) }}
+          · {{ T('decl_valid_until') }} {{ row.d.valid_until|date }}
+          {% if not row.active %}<span class="badge gray">{{ T('decl_expired') if row.d.status == 'active' else T('decl_withdrawn') }}</span>
+          {% elif row.expiring %}<span class="badge warn">{{ T('dash_expiring_soon') }}</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}<p class="muted">{{ T('dash_none') }}</p>{% endif %}
+    <a class="btn small" href="/me">{{ T('nav_my_team') }}</a>
+  </section>
+
+  <section class="card">
+    <h2>{{ T('dash_my_interests') }}</h2>
+    {% if my_interests %}
+      <ul>
+        {% for i in my_interests %}
+        <li>{{ i.player.name or i.player.ht_player_id }} — <span class="badge">{{ T('int_' + i.status) }}</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}<p class="muted">{{ T('dash_none') }}</p>{% endif %}
+    <a class="btn small" href="/market">{{ T('nav_market') }}</a>
+  </section>
+{% endif %}
+{% endblock %}

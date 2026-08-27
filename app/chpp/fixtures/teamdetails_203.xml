@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>teamdetails.xml</FileName>
+  <Version>3.9</Version>
+  <UserID>203</UserID>
+  <FetchedDate>2026-08-03 08:00:00</FetchedDate>
+  <User>
+    <UserID>203</UserID>
+    <Loginname>TishoTrainer</Loginname>
+    <SupporterTier>none</SupporterTier>
+    <LastLoginDate>2026-07-15 08:05:00</LastLoginDate>
+  </User>
+  <Teams>
+    <Team>
+      <TeamID>1003</TeamID>
+      <TeamName>Ludogorets Fan Club</TeamName>
+      <IsPrimaryClub>True</IsPrimaryClub>
+      <League>
+        <LeagueID>50</LeagueID>
+        <LeagueName>Bulgaria</LeagueName>
+      </League>
+      <BotStatus>
+        <IsBot>False</IsBot>
+      </BotStatus>
+    </Team>
+  </Teams>
+</HattrickData>

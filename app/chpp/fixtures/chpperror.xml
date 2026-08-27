@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>chpperror.xml</FileName>
+  <Version>1.0</Version>
+  <UserID>0</UserID>
+  <FetchedDate>2026-08-03 08:00:00</FetchedDate>
+  <Error>Request only allowed for teams owned by the requesting user</Error>
+  <ErrorCode>59</ErrorCode>
+</HattrickData>

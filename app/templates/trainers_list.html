@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ T('trainers_title') }}</h1>
+
+<form method="get" action="/trainers" class="filters">
+  <label>{{ T('filter_training_type') }}
+    <select name="training_type">
+      <option value="">—</option>
+      {% for s in training_skills %}
+      <option value="{{ s }}" {% if f_training_type == s %}selected{% endif %}>{{ T('skill_' + s) }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>{{ T('filter_slot_skill') }}
+    <select name="slot_skill">
+      <option value="">—</option>
+      {% for s in training_skills %}
+      <option value="{{ s }}" {% if f_slot_skill == s %}selected{% endif %}>{{ T('skill_' + s) }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>{{ T('filter_timing') }}
+    <select name="slot_timing">
+      <option value="">—</option>
+      {% for t_ in timings %}
+      <option value="{{ t_ }}" {% if f_slot_timing == t_ %}selected{% endif %}>{{ T('timing_' + t_) }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>{{ T('filter_min_budget') }}
+    <select name="min_budget">
+      <option value="">—</option>
+      {% for t_ in budget_thresholds %}
+      <option value="{{ t_ }}" {% if f_min_budget == t_ %}selected{% endif %}>≥ {{ t_|money }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label><input type="checkbox" name="only_free" value="1" {% if f_only_free %}checked{% endif %}> {{ T('filter_only_free') }}</label>
+  <label><input type="checkbox" name="include_stale" value="1" {% if f_include_stale %}checked{% endif %}> {{ T('filter_include_stale') }}</label>
+  <button class="btn" type="submit">{{ T('filter_apply') }}</button>
+</form>
+
+<table>
+  <tr>
+    <th>{{ T('th_trainer') }}</th>
+    <th>{{ T('th_training') }}</th>
+    <th>{{ T('coach_level') }}</th>
+    <th>{{ T('th_squad_occupancy') }}</th>
+    <th>{{ T('th_budget') }}</th>
+    <th>{{ T('th_slots') }}</th>
+    <th>{{ T('th_last_login') }}</th>
+    <th>{{ T('actions') }}</th>
+  </tr>
+  {% for r in rows %}
+  <tr {% if r.stale %}class="stale"{% endif %}>
+    <td><strong>{{ r.profile.team_name }}</strong><br><span class="muted">{{ r.profile.user.login_name }}</span></td>
+    <td><span class="badge">{{ T('skill_' + r.profile.training_type) if r.profile.training_type != 'other' else T('skill_other') }}</span></td>
+    <td>{{ level_name(r.profile.coach_level) }}</td>
+    <td>{{ T('occupancy_line', trained=r.trained, total=r.squad_size) }}</td>
+    <td>
+      {% if can_see_exact %}
+        {{ (r.profile.expected_cash if r.profile.expected_cash is not none else r.profile.cash)|money }}{% if r.profile.currency_name %} {{ r.profile.currency_name }}{% endif %}
+        <span class="muted">({{ T(r.band) }})</span>
+      {% else %}
+        {{ T(r.band) }}
+      {% endif %}
+    </td>
+    <td>
+      {% if r.active %}
+        {{ T('slot_summary', n=r.active|length) }}
+        {% for d in r.active %}
+          <div class="decl-line">
+            <span class="badge">{{ T('skill_' + d.slot_type) if d.slot_type != 'any' else T('skill_any') }}</span>
+            {% if d.quality_threshold %}<span class="muted small-text">{{ level_name(d.quality_threshold) }}+</span>{% endif %}
+            <span class="muted small-text">{{ T('timing_' + d.timing) }}{% if d.conditional_on_sale %} · {{ T('f_conditional') }}{% endif %}</span>
+          </div>
+          <div class="muted small-text decl-sub">
+            {% if d.training_weeks %}{{ T('decl_weeks_n', n=d.training_weeks) }}{% else %}{{ T('decl_indefinite') }}{% endif %}
+            · {{ T('decl_valid_until') }} {{ d.valid_until|date }}
+            {% if d.player_to_move %} · {{ T('decl_selling', name=d.player_to_move) }}{% if d.expected_sale_price %} ({{ d.expected_sale_price|money }}){% endif %}{% endif %}
+          </div>
+          {% if d.note %}<div class="muted small-text decl-sub">„{{ d.note }}“</div>{% endif %}
+        {% endfor %}
+      {% else %}
+        <span class="muted">{{ T('slots_none') }}</span>
+      {% endif %}
+    </td>
+    <td>{{ r.profile.ht_last_login|date }}</td>
+    <td><a class="btn small" href="{{ r.compose }}" target="_blank" rel="noopener">{{ T('compose_mail') }}</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

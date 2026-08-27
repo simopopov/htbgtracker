@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>players.xml</FileName>
+  <Version>2.8</Version>
+  <UserID>202</UserID>
+  <FetchedDate>2026-08-03 08:00:00</FetchedDate>
+  <Team>
+    <TeamID>1002</TeamID>
+    <TeamName>Cherno More Youth</TeamName>
+    <PlayerList>
+      <Player>
+        <PlayerID>60021</PlayerID>
+        <FirstName>Ivan</FirstName>
+        <LastName>Petkov</LastName>
+        <Age>18</Age>
+        <AgeDays>96</AgeDays>
+        <TSI>13100</TSI>
+        <Salary>5600</Salary>
+        <Specialty>2</Specialty>
+        <StaminaSkill>6</StaminaSkill>
+        <KeeperSkill>1</KeeperSkill>
+        <DefenderSkill>3</DefenderSkill>
+        <PlaymakerSkill>4</PlaymakerSkill>
+        <WingerSkill>7</WingerSkill>
+        <PassingSkill>4</PassingSkill>
+        <ScorerSkill>4</ScorerSkill>
+        <SetPiecesSkill>2</SetPiecesSkill>
+      </Player>
+      <Player>
+        <PlayerID>60022</PlayerID>
+        <FirstName>Rosen</FirstName>
+        <LastName>Apostolov</LastName>
+        <Age>17</Age>
+        <AgeDays>20</AgeDays>
+        <TSI>9800</TSI>
+        <Salary>4100</Salary>
+        <Specialty>2</Specialty>
+        <StaminaSkill>5</StaminaSkill>
+        <KeeperSkill>1</KeeperSkill>
+        <DefenderSkill>2</DefenderSkill>
+        <PlaymakerSkill>3</PlaymakerSkill>
+        <WingerSkill>6</WingerSkill>
+        <PassingSkill>3</PassingSkill>
+        <ScorerSkill>3</ScorerSkill>
+        <SetPiecesSkill>2</SetPiecesSkill>
+      </Player>
+      <Player>
+        <PlayerID>60023</PlayerID>
+        <FirstName>Hristo</FirstName>
+        <LastName>Bonev</LastName>
+        <Age>27</Age>
+        <AgeDays>50</AgeDays>
+        <TSI>4300</TSI>
+        <Salary>3000</Salary>
+        <Specialty>0</Specialty>
+        <StaminaSkill>7</StaminaSkill>
+        <KeeperSkill>1</KeeperSkill>
+        <DefenderSkill>6</DefenderSkill>
+        <PlaymakerSkill>4</PlaymakerSkill>
+        <WingerSkill>3</WingerSkill>
+        <PassingSkill>3</PassingSkill>
+        <ScorerSkill>2</ScorerSkill>
+        <SetPiecesSkill>3</SetPiecesSkill>
+      </Player>
+    </PlayerList>
+  </Team>
+</HattrickData>

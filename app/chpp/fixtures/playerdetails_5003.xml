@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>playerdetails.xml</FileName>
+  <Version>3.2</Version>
+  <UserID>105</UserID>
+  <FetchedDate>2026-08-03 08:00:00</FetchedDate>
+  <Player>
+    <PlayerID>5003</PlayerID>
+    <FirstName>Petar</FirstName>
+    <LastName>Ivanov</LastName>
+    <Age>18</Age>
+    <AgeDays>10</AgeDays>
+    <TSI>16900</TSI>
+    <Salary>6600</Salary>
+    <Specialty>4</Specialty>
+    <Caps>1</Caps>
+    <CapsU20>5</CapsU20>
+    <NationalTeamID>3175</NationalTeamID>
+    <NationalTeamName>Bulgaria</NationalTeamName>
+    <MotherClubBonus>False</MotherClubBonus>
+    <TransferListed>True</TransferListed>
+    <TransferDetails>
+      <AskingPrice>3200000</AskingPrice>
+      <Deadline>2026-08-05 20:30:00</Deadline>
+      <HighestBid>0</HighestBid>
+    </TransferDetails>
+    <OwningTeam>
+      <TeamID>2103</TeamID>
+      <TeamName>Etar 1924</TeamName>
+      <LeagueID>50</LeagueID>
+    </OwningTeam>
+  </Player>
+</HattrickData>

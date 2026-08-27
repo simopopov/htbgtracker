@@ -1,0 +1,5 @@
+# __DOMAIN__ is replaced by bootstrap.sh. Caddy handles HTTPS automatically.
+__DOMAIN__ {
+	encode gzip
+	reverse_proxy 127.0.0.1:8000
+}

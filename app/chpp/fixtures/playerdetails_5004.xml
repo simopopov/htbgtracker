@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>playerdetails.xml</FileName>
+  <Version>3.2</Version>
+  <UserID>104</UserID>
+  <FetchedDate>2026-08-03 08:00:00</FetchedDate>
+  <Player>
+    <PlayerID>5004</PlayerID>
+    <FirstName>Stefan</FirstName>
+    <LastName>Bozhkov</LastName>
+    <Age>17</Age>
+    <AgeDays>101</AgeDays>
+    <TSI>7400</TSI>
+    <Salary>3500</Salary>
+    <Specialty>0</Specialty>
+    <Caps>0</Caps>
+    <CapsU20>1</CapsU20>
+    <MotherClubBonus>False</MotherClubBonus>
+    <TransferListed>False</TransferListed>
+    <OwningTeam>
+      <TeamID>2104</TeamID>
+      <TeamName>Slavia Sofia Reserves</TeamName>
+      <LeagueID>50</LeagueID>
+    </OwningTeam>
+  </Player>
+</HattrickData>

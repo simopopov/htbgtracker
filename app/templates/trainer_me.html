@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ T('me_title') }}</h1>
+
+{% if not profile %}
+  <section class="card">
+    <p>{{ T('me_not_connected') }}</p>
+    <p class="muted">{{ T('me_connect_hint') }}</p>
+    <form method="post" action="/me/sync">
+      <button class="btn primary" type="submit">{{ T('me_connect_btn') }}</button>
+    </form>
+  </section>
+{% else %}
+  <section class="card">
+    <h2>{{ T('me_profile') }} — {{ profile.team_name }}</h2>
+    <div class="kv">
+      <div><span>{{ T('me_training_type') }}</span>{{ T('skill_' + profile.training_type) if profile.training_type != 'other' else T('skill_other') }}</div>
+      <div><span>{{ T('coach_level') }}</span>{{ level_name(profile.coach_level) }}</div>
+      <div><span>{{ T('me_intensity') }}</span>{{ profile.training_intensity if profile.training_intensity is not none else '—' }}%</div>
+      <div><span>{{ T('me_stamina') }}</span>{{ profile.stamina_share if profile.stamina_share is not none else '—' }}%</div>
+      <div><span>{{ T('me_cash') }}</span>{{ profile.cash|money }}{% if profile.currency_name %} {{ profile.currency_name }}{% endif %}</div>
+      <div><span>{{ T('me_expected_cash') }}</span>{{ profile.expected_cash|money }}{% if profile.currency_name %} {{ profile.currency_name }}{% endif %}</div>
+      <div><span>{{ T('me_last_sync') }}</span>{{ profile.last_sync|date }}</div>
+    </div>
+    <form method="post" action="/me/sync" class="inline">
+      <button class="btn small" type="submit">{{ T('sync_now') }}</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>{{ T('me_squad_title') }}</h2>
+    <table>
+      <tr><th>{{ T('name') }}</th><th>{{ T('age') }}</th><th>TSI</th><th>{{ T('pd_specialty') }}</th><th>{{ T('me_in_training') }}</th></tr>
+      {% for p in profile.squad %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td>{{ p.age_years }}.{{ p.age_days }}</td>
+        <td>{{ p.tsi|money }}</td>
+        <td>{{ T('spec_id_' + (p.specialty_id or 0)|string) }}</td>
+        <td>
+          <form method="post" action="/me/trained/{{ p.id }}" class="inline">
+            <button class="btn small {% if p.in_trained_position %}primary{% endif %}" type="submit">
+              {% if p.in_trained_position %}✓{% else %}—{% endif %}
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>{{ T('me_declarations_title') }}</h2>
+    {% if declarations %}
+    <table>
+      <tr><th>{{ T('f_slot_type') }}</th><th>{{ T('f_quality_threshold') }}</th><th>{{ T('f_timing') }}</th><th>{{ T('f_player_to_move') }}</th><th>{{ T('decl_valid_until') }}</th><th>{{ T('status') }}</th><th>{{ T('actions') }}</th></tr>
+      {% for d in declarations %}
+      <tr>
+        <td>{{ T('skill_' + d.slot_type) if d.slot_type != 'any' else T('skill_any') }}
+          {% if d.note %}<div class="muted small-text">{{ d.note }}</div>{% endif %}
+        </td>
+        <td>{% if d.quality_threshold %}{{ level_name(d.quality_threshold) }}{% else %}—{% endif %}</td>
+        <td>{{ T('timing_' + d.timing) }}{% if d.conditional_on_sale %} · {{ T('f_conditional') }}{% endif %}
+          <div class="muted small-text">{% if d.training_weeks %}{{ T('decl_weeks_n', n=d.training_weeks) }}{% else %}{{ T('decl_indefinite') }}{% endif %}</div>
+        </td>
+        <td>{{ d.player_to_move or '—' }}{% if d.expected_sale_price %} ({{ d.expected_sale_price|money }}){% endif %}</td>
+        <td>{{ d.valid_until|date }}</td>
+        <td>
+          {% if d.status == 'withdrawn' %}<span class="badge gray">{{ T('decl_withdrawn') }}</span>
+          {% elif declaration_active[d.id] %}<span class="badge ok-badge">{{ T('decl_active') }}</span>
+          {% else %}<span class="badge warn">{{ T('decl_expired') }}</span>{% endif %}
+        </td>
+        <td>
+          <form method="post" action="/declarations/{{ d.id }}/renew" class="inline">
+            <button class="btn small" type="submit">{{ T('renew') }}</button>
+          </form>
+          {% if d.status == 'active' %}
+          <form method="post" action="/declarations/{{ d.id }}/withdraw" class="inline">
+            <button class="btn small" type="submit">{{ T('withdraw') }}</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}<p class="muted">{{ T('dash_none') }}</p>{% endif %}
+
+    <h3>{{ T('me_new_declaration') }}</h3>
+    <form method="post" action="/declarations" class="form-grid">
+      <label>{{ T('f_slot_type') }}
+        <select name="slot_type">
+          <option value="any">{{ T('skill_any') }}</option>
+          {% for s in training_skills %}<option value="{{ s }}">{{ T('skill_' + s) }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>{{ T('f_quality_threshold') }}
+        <input type="number" name="quality_threshold" min="1" max="20">
+      </label>
+      <label>{{ T('f_training_weeks') }}
+        <input type="number" name="training_weeks" min="1" max="500" placeholder="{{ T('decl_indefinite') }}">
+      </label>
+      <label>{{ T('f_timing') }}
+        <select name="timing">
+          {% for t_ in timings %}<option value="{{ t_ }}">{{ T('timing_' + t_) }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>{{ T('f_player_to_move') }}
+        <input type="text" name="player_to_move">
+      </label>
+      <label>{{ T('f_expected_sale_price') }}
+        <input type="text" name="expected_sale_price">
+      </label>
+      <label>{{ T('f_valid_days') }}
+        <input type="number" name="valid_days" value="{{ default_days }}" min="1" max="112">
+      </label>
+      <label class="check"><input type="checkbox" name="conditional_on_sale" value="1"> {{ T('f_conditional') }}</label>
+      <label class="wide">{{ T('f_note') }}
+        <textarea name="note" rows="2"></textarea>
+      </label>
+      <div class="wide"><button class="btn primary" type="submit">{{ T('save') }}</button></div>
+    </form>
+  </section>
+
+  <section class="card danger">
+    <h2>{{ T('me_revoke_title') }}</h2>
+    <p class="muted">{{ T('me_revoke_hint') }}</p>
+    <form method="post" action="/me/revoke">
+      <button class="btn danger-btn" type="submit">{{ T('me_revoke_btn') }}</button>
+    </form>
+  </section>
+{% endif %}
+{% endblock %}

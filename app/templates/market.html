@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ T('market_title') }}</h1>
+<p class="muted">{{ T('market_intro') }}</p>
+
+{% if profile %}
+<form method="get" action="/market" class="filters">
+  <label><input type="checkbox" name="only_mine" value="1" {% if f_only_mine %}checked{% endif %}> {{ T('market_only_mine') }}</label>
+  <button class="btn" type="submit">{{ T('filter_apply') }}</button>
+</form>
+{% endif %}
+
+{% if rows %}
+<table>
+  <tr>
+    <th>{{ T('th_player') }}</th>
+    <th>{{ T('age') }}</th>
+    <th>{{ T('th_target') }}</th>
+    <th>{{ T('price_est') }}</th>
+    <th>{{ T('th_status') }}</th>
+    <th>{{ T('market_scout') }}</th>
+    <th>{{ T('actions') }}</th>
+  </tr>
+  {% for r in rows %}
+  <tr>
+    <td>
+      <a href="/players/{{ r.player.id }}"><strong>{{ r.player.name or r.player.ht_player_id }}</strong></a>
+      <div class="muted small-text"><a href="{{ r.url }}" target="_blank" rel="noopener">{{ T('hattrick_page') }}</a></div>
+    </td>
+    <td>{% if r.player.age_years is not none %}{{ r.player.age_years }}.{{ r.player.age_days }}{% else %}—{% endif %}</td>
+    <td>{{ T('skill_' + r.player.target_skill) }}
+      {% if r.player.plan_steps %}
+      <div class="muted small-text">
+        {% for step in r.player.plan_steps %}{{ loop.index }}. {{ T('skill_' + step.skill) }} ~{{ step.weeks if step.weeks is not none else '?' }} {{ T('plan_weeks_short') }} / {{ step.stamina_share if step.stamina_share is not none else '?' }}%{% if not loop.last %} · {% endif %}{% endfor %}
+      </div>
+      {% endif %}
+      {% if r.player.skills %}
+      <div class="muted small-text">
+        {% for s, v in r.player.skills.items() %}{{ T('skill_' + s) }} {{ v }}{% if not loop.last %}, {% endif %}{% endfor %}
+      </div>
+      {% endif %}
+    </td>
+    <td>{{ r.player.estimated_price|money }}</td>
+    <td>
+      <span class="badge status-{{ r.player.market_status }}">{{ T('status_' + r.player.market_status) }}</span>
+      {% if r.player.market_status == 'listed' and r.player.deadline %}
+        <div class="muted small-text">{{ T('pd_deadline') }}: {{ r.player.deadline|date }}</div>
+      {% elif r.player.expected_listing %}
+        <div class="muted small-text">{{ r.player.expected_listing|date }}</div>
+      {% endif %}
+    </td>
+    <td>
+      {% if r.claim %}{{ r.claim.scout.login_name }}
+        {% if r.scout_compose %}<div class="small-text"><a href="{{ r.scout_compose }}" target="_blank" rel="noopener">{{ T('pd_contact_scout') }}</a></div>{% endif %}
+      {% else %}<span class="muted">—</span>{% endif %}
+    </td>
+    <td>
+      {% if r.my_interest %}
+        <span class="badge">{{ T('int_' + r.my_interest.status) }}</span>
+        {% if r.my_interest.status == 'open' %}
+        <form method="post" action="/interests/{{ r.my_interest.id }}/withdraw" class="inline">
+          <button class="btn small" type="submit">{{ T('withdraw') }}</button>
+        </form>
+        {% endif %}
+      {% elif profile %}
+        <form method="post" action="/players/{{ r.player.id }}/interest" class="interest-form">
+          <input type="text" name="max_bid" placeholder="{{ T('f_max_bid') }}">
+          <button class="btn small primary" type="submit">{{ T('market_interest') }}</button>
+        </form>
+      {% else %}
+        <span class="muted small-text">{{ T('me_connect_hint') }}</span>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="muted">{{ T('market_no_players') }}</p>
+{% endif %}
+{% endblock %}

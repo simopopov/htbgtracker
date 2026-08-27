@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>teamdetails.xml</FileName>
+  <Version>3.9</Version>
+  <UserID>202</UserID>
+  <FetchedDate>2026-08-03 08:00:00</FetchedDate>
+  <User>
+    <UserID>202</UserID>
+    <Loginname>ZharkoTrainer</Loginname>
+    <SupporterTier>none</SupporterTier>
+    <LastLoginDate>2026-07-29 19:40:00</LastLoginDate>
+  </User>
+  <Teams>
+    <Team>
+      <TeamID>1002</TeamID>
+      <TeamName>Cherno More Youth</TeamName>
+      <IsPrimaryClub>True</IsPrimaryClub>
+      <League>
+        <LeagueID>50</LeagueID>
+        <LeagueName>Bulgaria</LeagueName>
+      </League>
+      <BotStatus>
+        <IsBot>False</IsBot>
+      </BotStatus>
+    </Team>
+  </Teams>
+</HattrickData>

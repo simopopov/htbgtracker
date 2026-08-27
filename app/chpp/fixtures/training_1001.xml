@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>training.xml</FileName>
+  <Version>2.2</Version>
+  <UserID>201</UserID>
+  <FetchedDate>2026-08-03 08:00:00</FetchedDate>
+  <Team>
+    <TeamID>1001</TeamID>
+    <TrainingType>8</TrainingType>
+    <TrainingLevel>100</TrainingLevel>
+    <StaminaTrainingPart>10</StaminaTrainingPart>
+    <Trainer>
+      <PlayerID>90001</PlayerID>
+      <TrainerSkillLevel>7</TrainerSkillLevel>
+    </Trainer>
+    <AssistantTrainersLevel>10</AssistantTrainersLevel>
+  </Team>
+</HattrickData>

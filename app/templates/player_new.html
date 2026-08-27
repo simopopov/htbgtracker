@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ T('player_new_title') }}</h1>
+<p class="muted">{{ T('help_public_autofill') }}</p>
+
+<form method="post" action="/players/new" class="form-grid">
+  <label>{{ T('f_ht_player_id') }}
+    <input type="number" name="ht_player_id" required min="1">
+  </label>
+  <label>{{ T('f_name_opt') }}
+    <input type="text" name="name">
+  </label>
+  <label>{{ T('f_squad') }}
+    <select name="squad">
+      {% for s in nt_squads %}<option value="{{ s }}">{{ T('squad_' + s) }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>{{ T('f_target_skill') }}
+    <select name="target_skill">
+      {% for s in training_skills %}<option value="{{ s }}">{{ T('skill_' + s) }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>{{ T('f_age_years') }}
+    <input type="number" name="age_years" min="15" max="45">
+  </label>
+  <label>{{ T('f_age_days') }}
+    <input type="number" name="age_days" min="0" max="111">
+  </label>
+  <label>{{ T('f_specialty') }}
+    <select name="specialty">
+      {% for sid in specialty_ids %}<option value="{{ sid }}">{{ T('spec_id_' + sid|string) }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>{{ T('f_est_price') }}
+    <input type="text" name="estimated_price" placeholder="2500000">
+  </label>
+  <label>{{ T('f_market_status') }}
+    <select name="market_status">
+      {% for s in market_statuses %}<option value="{{ s }}">{{ T('status_' + s) }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>{{ T('f_expected_listing') }}
+    <input type="date" name="expected_listing">
+  </label>
+  <fieldset class="wide skills-grid">
+    <legend>{{ T('skills_title') }} <span class="muted small-text">— {{ T('skills_hint') }}</span></legend>
+    {% for s in player_skills %}
+    <label>{{ T('skill_' + s) }}
+      <input type="number" name="sk_{{ s }}" min="1" max="20">
+    </label>
+    {% endfor %}
+  </fieldset>
+  <label class="wide">{{ T('f_notes') }}
+    <textarea name="notes" rows="3"></textarea>
+  </label>
+  <div class="wide">
+    <button class="btn primary" type="submit">{{ T('submit_add') }}</button>
+    <a class="btn" href="/players">{{ T('cancel') }}</a>
+  </div>
+</form>
+{% endblock %}

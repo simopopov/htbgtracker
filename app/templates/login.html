@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ T('login_title') }}</h1>
+<p class="muted">{{ T('login_intro') }}</p>
+
+{% if oauth_ready %}
+  <a class="btn primary" href="/auth/chpp/start">{{ T('login_with_ht') }}</a>
+{% else %}
+  <p class="notice">{{ T('login_oauth_missing') }}</p>
+{% endif %}
+
+{% if settings.chpp_mock and personas %}
+  <h2>{{ T('login_mock_title') }}</h2>
+  <p class="muted">{{ T('login_mock_hint') }}</p>
+  <div class="cards">
+    {% for p in personas %}
+      <form method="post" action="/auth/mock" class="card persona">
+        <input type="hidden" name="ht_user_id" value="{{ p.ht_user_id }}">
+        <div class="card-title">{{ p.login_name }}</div>
+        <div class="muted">{{ T('role_' + p.role) }}</div>
+        <button class="btn" type="submit">{{ T('login_as') }}</button>
+      </form>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

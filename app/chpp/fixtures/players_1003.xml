@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>players.xml</FileName>
+  <Version>2.8</Version>
+  <UserID>203</UserID>
+  <FetchedDate>2026-08-03 08:00:00</FetchedDate>
+  <Team>
+    <TeamID>1003</TeamID>
+    <TeamName>Ludogorets Fan Club</TeamName>
+    <PlayerList>
+      <Player>
+        <PlayerID>60031</PlayerID>
+        <FirstName>Yordan</FirstName>
+        <LastName>Minchev</LastName>
+        <Age>17</Age>
+        <AgeDays>70</AgeDays>
+        <TSI>11200</TSI>
+        <Salary>4700</Salary>
+        <Specialty>3</Specialty>
+        <StaminaSkill>6</StaminaSkill>
+        <KeeperSkill>1</KeeperSkill>
+        <DefenderSkill>2</DefenderSkill>
+        <PlaymakerSkill>3</PlaymakerSkill>
+        <WingerSkill>3</WingerSkill>
+        <PassingSkill>4</PassingSkill>
+        <ScorerSkill>7</ScorerSkill>
+        <SetPiecesSkill>3</SetPiecesSkill>
+      </Player>
+      <Player>
+        <PlayerID>60032</PlayerID>
+        <FirstName>Plamen</FirstName>
+        <LastName>Getov</LastName>
+        <Age>25</Age>
+        <AgeDays>30</AgeDays>
+        <TSI>5100</TSI>
+        <Salary>3600</Salary>
+        <Specialty>0</Specialty>
+        <StaminaSkill>7</StaminaSkill>
+        <KeeperSkill>1</KeeperSkill>
+        <DefenderSkill>5</DefenderSkill>
+        <PlaymakerSkill>4</PlaymakerSkill>
+        <WingerSkill>2</WingerSkill>
+        <PassingSkill>4</PassingSkill>
+        <ScorerSkill>5</ScorerSkill>
+        <SetPiecesSkill>4</SetPiecesSkill>
+      </Player>
+    </PlayerList>
+  </Team>
+</HattrickData>

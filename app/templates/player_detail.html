@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ player.name or player.ht_player_id }}
+    <span class="badge">{{ T('squad_' + player.squad) }}</span>
+    <span class="badge status-{{ player.market_status }}">{{ T('status_' + player.market_status) }}</span>
+  </h1>
+  <a class="btn" href="{{ hattrick_url }}" target="_blank" rel="noopener">{{ T('hattrick_page') }}</a>
+</div>
+
+<section class="card">
+  <h2>{{ T('pd_public_data') }}</h2>
+  <div class="kv">
+    <div><span>{{ T('pd_age') }}</span>{% if player.age_years is not none %}{{ player.age_years }}.{{ player.age_days }}{% else %}—{% endif %}</div>
+    <div><span>TSI</span>{{ player.tsi|money }}</div>
+    <div><span>{{ T('pd_salary') }}</span>{{ player.salary|money }}{% if player.currency_name %} {{ player.currency_name }}{% endif %}</div>
+    <div><span>{{ T('pd_specialty') }}</span>{{ T('spec_id_' + (player.specialty_id or 0)|string) }}</div>
+    <div><span>{{ T('pd_owner') }}</span>{{ player.owner_team_name or '—' }}</div>
+    <div><span>{{ T('pd_caps') }}</span>{{ player.caps if player.caps is not none else '—' }} / U20: {{ player.caps_u20 if player.caps_u20 is not none else '—' }}</div>
+    <div><span>{{ T('pd_nt') }}</span>{% if player.national_team_id %}<span class="badge ok-badge">{{ player.national_team_name or player.national_team_id }}</span>{% else %}—{% endif %}</div>
+    {% if player.market_status == 'listed' %}
+    <div><span>{{ T('pd_asking_price') }}</span>{{ player.asking_price|money }}{% if player.currency_name %} {{ player.currency_name }}{% endif %}</div>
+    <div><span>{{ T('pd_deadline') }}</span>{{ player.deadline|date }}</div>
+    {% endif %}
+    <div><span>{{ T('pd_last_sync') }}</span>{{ player.last_public_sync|date }}</div>
+  </div>
+  {% if is_scout %}
+  <form method="post" action="/players/{{ player.id }}/sync">
+    <button class="btn small" type="submit">{{ T('sync_now') }}</button>
+  </form>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ T('skills_title') }}</h2>
+  {% if player.skills %}
+    <div class="skill-chips">
+      {% for s in player_skills %}
+        {% if player.skills.get(s) %}
+        <span class="badge">{{ T('skill_' + s) }}: {{ level_name(player.skills[s]) }} ({{ player.skills[s] }})</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">{{ T('skills_hint') }}</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ T('plan_title') }}</h2>
+  <p class="muted small-text">{{ T('plan_hint') }}</p>
+  {% if player.plan_steps %}
+  <table>
+    <tr><th>#</th><th>{{ T('plan_col_skill') }}</th><th>{{ T('plan_col_weeks') }}</th><th>{{ T('plan_col_stamina') }}</th>{% if is_scout %}<th></th>{% endif %}</tr>
+    {% for step in player.plan_steps %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ T('skill_' + step.skill) }}</td>
+      <td>{{ step.weeks if step.weeks is not none else '—' }}</td>
+      <td>{{ step.stamina_share if step.stamina_share is not none else '—' }}</td>
+      {% if is_scout %}
+      <td>
+        <form method="post" action="/plan/{{ step.id }}/delete" class="inline">
+          <button class="btn small" type="submit">{{ T('delete') }}</button>
+        </form>
+      </td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">{{ T('plan_none') }}</p>
+  {% endif %}
+  {% if is_scout %}
+  <form method="post" action="/players/{{ player.id }}/plan" class="filters">
+    <label>{{ T('plan_col_skill') }}
+      <select name="skill">
+        {% for s in training_skills %}
+        <option value="{{ s }}" {% if s == player.target_skill %}selected{% endif %}>{{ T('skill_' + s) }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>{{ T('plan_col_weeks') }}
+      <input type="number" name="weeks" min="1" max="112" style="width:5rem">
+    </label>
+    <label>{{ T('plan_col_stamina') }}
+      <input type="number" name="stamina_share" min="0" max="100" style="width:5rem">
+    </label>
+    <button class="btn" type="submit">{{ T('plan_add') }}</button>
+  </form>
+  {% endif %}
+</section>
+
+{% if is_scout %}
+<section class="card">
+  <h2>{{ T('pd_scout_fields') }}</h2>
+  <form method="post" action="/players/{{ player.id }}/status" class="form-grid">
+    <label>{{ T('f_market_status') }}
+      <select name="market_status">
+        {% for s in market_statuses %}
+        <option value="{{ s }}" {% if player.market_status == s %}selected{% endif %}>{{ T('status_' + s) }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>{{ T('f_est_price') }}
+      <input type="text" name="estimated_price" value="{{ player.estimated_price or '' }}">
+    </label>
+    <label>{{ T('f_expected_listing') }}
+      <input type="date" name="expected_listing" value="{% if player.expected_listing %}{{ player.expected_listing.strftime('%Y-%m-%d') }}{% endif %}">
+    </label>
+    <label>{{ T('f_age_years') }}
+      <input type="number" name="age_years" min="15" max="45" value="{{ player.age_years if player.age_years is not none else '' }}">
+    </label>
+    <label>{{ T('f_age_days') }}
+      <input type="number" name="age_days" min="0" max="111" value="{{ player.age_days if player.age_days is not none else '' }}">
+    </label>
+    <label>{{ T('f_specialty') }}
+      <select name="specialty">
+        {% for sid in specialty_ids %}
+        <option value="{{ sid }}" {% if player.specialty_id == sid %}selected{% endif %}>{{ T('spec_id_' + sid|string) }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <fieldset class="wide skills-grid">
+      <legend>{{ T('skills_title') }} <span class="muted small-text">— {{ T('skills_hint') }}</span></legend>
+      {% for s in player_skills %}
+      <label>{{ T('skill_' + s) }}
+        <input type="number" name="sk_{{ s }}" min="1" max="20"
+               value="{{ player.skills.get(s, '') if player.skills else '' }}">
+      </label>
+      {% endfor %}
+    </fieldset>
+    <label class="wide">{{ T('f_notes') }}
+      <textarea name="notes" rows="3">{{ player.notes }}</textarea>
+    </label>
+    <div class="wide"><button class="btn primary" type="submit">{{ T('save') }}</button></div>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ T('pd_claim_title') }}</h2>
+  {% if claim %}
+    <p>{{ T('pd_claimed_by') }} <strong>{{ claim.scout.login_name }}</strong> ({{ claim.created_at|date }})
+      {% if claim.trainer_profile %} → {{ claim.trainer_profile.team_name }}{% endif %}
+    </p>
+    <form method="post" action="/players/{{ player.id }}/release">
+      <button class="btn small" type="submit">{{ T('pd_release_btn') }}</button>
+    </form>
+  {% else %}
+    <p class="muted">{{ T('unclaimed') }}</p>
+    <form method="post" action="/players/{{ player.id }}/claim">
+      <button class="btn primary" type="submit">{{ T('pd_claim_btn') }}</button>
+    </form>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ T('pd_interests_title') }}</h2>
+  {% if interests %}
+    <table>
+      <tr><th>{{ T('th_trainer') }}</th><th>{{ T('f_max_bid') }}</th><th>{{ T('notes') }}</th><th>{{ T('status') }}</th><th>{{ T('created') }}</th><th></th></tr>
+      {% for i in interests %}
+      <tr>
+        <td>{{ i.profile.team_name }} ({{ i.profile.user.login_name }})</td>
+        <td>{% if i.max_bid %}{{ i.max_bid|money }}{% else %}—{% endif %}</td>
+        <td>{{ i.note }}</td>
+        <td><span class="badge">{{ T('int_' + i.status) }}</span></td>
+        <td>{{ i.created_at|date }}</td>
+        <td>
+          {% if i.status == 'open' %}
+          <form method="post" action="/interests/{{ i.id }}/decision" class="inline">
+            <button class="btn small primary" name="action" value="accept">{{ T('pd_accept') }}</button>
+            <button class="btn small" name="action" value="decline">{{ T('pd_decline') }}</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}<p class="muted">{{ T('pd_no_interests') }}</p>{% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ T('pd_matching_title') }}</h2>
+  {% for row in matches %}
+  <div class="match">
+    <div class="match-head">
+      <strong>{{ row.m.profile.team_name }}</strong>
+      <span class="muted">{{ row.m.user.login_name }}</span>
+      <span class="badge">{{ T('skill_' + row.m.profile.training_type) if row.m.profile.training_type != 'other' else T('skill_other') }}</span>
+      <span class="badge">{% if can_see_exact %}{{ (row.m.profile.expected_cash if row.m.profile.expected_cash is not none else row.m.profile.cash)|money }}{% if row.m.profile.currency_name %} {{ row.m.profile.currency_name }}{% endif %}{% else %}{{ T(row.band) }}{% endif %}</span>
+      <span class="score">{{ T('pd_score') }}: {{ row.m.score }}</span>
+    </div>
+    <ul class="reasons">
+      {% for r in row.m.reasons %}<li class="ok">{{ TT(r) }}</li>{% endfor %}
+      {% for w in row.m.warnings %}<li class="warning-item">{{ TT(w) }}</li>{% endfor %}
+    </ul>
+    <details>
+      <summary>{{ T('pd_draft_toggle') }}</summary>
+      <div class="draft-row">
+        <input class="draft-subject" type="text" readonly value="{{ row.subject }}">
+        <button type="button" class="btn small copy-btn" data-done="{{ T('copied') }}">{{ T('copy_subject') }}</button>
+      </div>
+      <div class="draft-row">
+        <textarea class="draft" rows="9" readonly>{{ row.draft }}</textarea>
+        <button type="button" class="btn small copy-btn" data-done="{{ T('copied') }}">{{ T('copy_message') }}</button>
+      </div>
+      <p class="muted small-text">{{ T('pd_copy_hint') }}</p>
+    </details>
+    <a class="btn small" href="{{ row.compose }}" target="_blank" rel="noopener">{{ T('compose_mail') }}</a>
+  </div>
+  {% else %}
+  <p class="muted">{{ T('dash_none') }}</p>
+  {% endfor %}
+</section>
+
+{% else %}
+<section class="card">
+  <h2>{{ T('pd_interest_title') }}</h2>
+  {% if claim %}
+    <p class="muted">{{ T('pd_claimed_by') }} {{ claim.scout.login_name }}
+      {% if scout_compose %}— <a href="{{ scout_compose }}" target="_blank" rel="noopener">{{ T('pd_contact_scout') }}</a>{% endif %}
+    </p>
+  {% endif %}
+  {% if my_interest %}
+    <p>{{ T('pd_my_interest_status') }}: <span class="badge">{{ T('int_' + my_interest.status) }}</span></p>
+  {% elif user.trainer_profile %}
+    <form method="post" action="/players/{{ player.id }}/interest">
+      <label class="small-text muted">{{ T('f_max_bid') }}
+        <input type="text" name="max_bid" placeholder="2500000">
+      </label>
+      <textarea name="note" rows="2" placeholder="{{ T('pd_interest_note_ph') }}"></textarea>
+      <button class="btn primary" type="submit">{{ T('pd_interest_btn') }}</button>
+    </form>
+  {% else %}
+    <p class="notice">{{ T('me_connect_hint') }}</p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% macro comment_block(row, is_reply=false) %}
+<div class="comment {% if is_reply %}comment-reply{% endif %}">
+  <div class="comment-head">
+    <strong>{{ row.c.author.login_name }}</strong>
+    <span class="muted small-text">{{ T('role_' + row.c.author.role) }} · {{ row.c.created_at|date }}</span>
+    {% if row.mail %}
+    <button type="button" class="btn small"
+            onclick="document.getElementById('mail-c{{ row.c.id }}').showModal()">{{ T('compose_mail') }}</button>
+    {% endif %}
+    {% if row.c.author_id == user.id or user.role in ('head_coach', 'master_scout') %}
+    <form method="post" action="/comments/{{ row.c.id }}/delete" class="inline">
+      <button class="btn small" type="submit">{{ T('delete') }}</button>
+    </form>
+    {% endif %}
+  </div>
+  <div class="comment-body">{{ row.c.body }}</div>
+  {% if row.mail %}
+  <dialog id="mail-c{{ row.c.id }}" class="mail-modal">
+    <h3>{{ T('comment_write_mail') }} — {{ row.c.author.login_name }}</h3>
+    <div class="draft-row">
+      <input class="draft-subject" type="text" readonly value="{{ row.mail.subject }}">
+      <button type="button" class="btn small copy-btn" data-done="{{ T('copied') }}">{{ T('copy_subject') }}</button>
+    </div>
+    <div class="draft-row">
+      <textarea class="draft" rows="8" readonly>{{ row.mail.body }}</textarea>
+      <button type="button" class="btn small copy-btn" data-done="{{ T('copied') }}">{{ T('copy_message') }}</button>
+    </div>
+    <p class="muted small-text">{{ T('comment_mail_hint') }}</p>
+    <div class="modal-actions">
+      <a class="btn small primary" href="{{ row.mail.compose }}" target="_blank" rel="noopener">{{ T('compose_mail') }}</a>
+      <button type="button" class="btn small" onclick="this.closest('dialog').close()">{{ T('modal_close') }}</button>
+    </div>
+  </dialog>
+  {% endif %}
+</div>
+{% endmacro %}
+
+<section class="card" id="comments">
+  <h2>{{ T('comments_title') }}</h2>
+  {% for row in comments_ctx %}
+    {{ comment_block(row) }}
+    {% for reply in row.replies %}{{ comment_block(reply, true) }}{% endfor %}
+    <details class="comment-reply-toggle">
+      <summary class="muted small-text">{{ T('comment_reply') }}</summary>
+      <form method="post" action="/players/{{ player.id }}/comments" class="comment-form">
+        <input type="hidden" name="parent_id" value="{{ row.c.id }}">
+        <textarea name="body" rows="2" required placeholder="{{ T('comment_placeholder') }}"></textarea>
+        <button class="btn small" type="submit">{{ T('comment_submit') }}</button>
+      </form>
+    </details>
+  {% else %}
+    <p class="muted">{{ T('comments_none') }}</p>
+  {% endfor %}
+  <form method="post" action="/players/{{ player.id }}/comments" class="comment-form">
+    <textarea name="body" rows="3" required placeholder="{{ T('comment_placeholder') }}"></textarea>
+    <button class="btn primary" type="submit">{{ T('comment_submit') }}</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>worlddetails.xml</FileName>
+  <Version>1.9</Version>
+  <UserID>201</UserID>
+  <FetchedDate>2026-08-03 08:00:00</FetchedDate>
+  <LeagueList>
+    <League>
+      <LeagueID>50</LeagueID>
+      <LeagueName>Mockland</LeagueName>
+      <Country>
+        <CountryID>50</CountryID>
+        <CountryName>Mockland</CountryName>
+        <CurrencyName>€</CurrencyName>
+        <CurrencyRate>1</CurrencyRate>
+      </Country>
+    </League>
+    <League>
+      <LeagueID>51</LeagueID>
+      <LeagueName>Commaland</LeagueName>
+      <Country>
+        <CountryID>51</CountryID>
+        <CountryName>Commaland</CountryName>
+        <CurrencyName>lev</CurrencyName>
+        <CurrencyRate>5,1129</CurrencyRate>
+      </Country>
+    </League>
+  </LeagueList>
+</HattrickData>

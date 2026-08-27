@@ -46,6 +46,27 @@ STRINGS: dict[str, dict[str, str]] = {
 
     # --- login ---
     "login_title": {"en": "Sign in", "bg": "Вход"},
+    "login_eyebrow": {"en": "National team · scouts & trainers", "bg": "Национален отбор · скаути и трениращи"},
+    "login_headline": {"en": "Every talent finds its trainer.", "bg": "Всеки талант намира своя трениращ."},
+    "login_feat1_t": {"en": "Capacity at a glance", "bg": "Капацитетът на един поглед"},
+    "login_feat1_d": {
+        "en": "Which trainer has a slot, the budget and the right training — instead of forty HT-mails.",
+        "bg": "Кой трениращ има слот, бюджет и правилната тренировка — вместо четиридесет HT-mail-а.",
+    },
+    "login_feat2_t": {"en": "Market pipeline", "bg": "Пазарен поток"},
+    "login_feat2_d": {
+        "en": "Scouts announce who is coming to market; trainers raise a hand with a bid limit.",
+        "bg": "Скаутите обявяват кой излиза на пазара; трениращите заявяват интерес с лимит за наддаване.",
+    },
+    "login_feat3_t": {"en": "Read-only CHPP", "bg": "Само четене през CHPP"},
+    "login_feat3_d": {
+        "en": "Official Hattrick API access, no passwords stored. Messages are always sent manually in Hattrick.",
+        "bg": "Официален достъп през Hattrick API, без съхранявани пароли. Съобщенията винаги се пращат ръчно в Hattrick.",
+    },
+    "login_note": {
+        "en": "Signing in only identifies you. Your team data is read after you explicitly connect it, and you can revoke access at any time.",
+        "bg": "Входът само те идентифицира. Данните за отбора ти се четат едва след като изрично го свържеш, и можеш да прекратиш достъпа по всяко време.",
+    },
     "login_intro": {
         "en": "Connect with your Hattrick account via CHPP OAuth. The app only ever reads data — it never changes anything in your team.",
         "bg": "Свържете се с вашия Hattrick акаунт през CHPP OAuth. Приложението само чете данни — никога не променя нищо по отбора ви.",

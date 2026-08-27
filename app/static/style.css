@@ -165,3 +165,19 @@ textarea { width: 100%; }
 .modal-actions { display: flex; gap: 0.5rem; margin-top: 0.7rem; }
 
 footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 1.8rem 0 2.4rem; }
+
+/* --- login / landing --- */
+.login-wrap { display: grid; grid-template-columns: 1.25fr 1fr; gap: 3.5rem; align-items: center; min-height: 62vh; max-width: 1060px; margin: 0 auto; padding: 2rem 0; }
+@media (max-width: 880px) { .login-wrap { grid-template-columns: 1fr; gap: 2rem; min-height: 0; } }
+.eyebrow { font-family: var(--display); font-size: 0.74rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent-strong); margin-bottom: 0.9rem; }
+.login-headline { font-size: 2.6rem; line-height: 1.12; margin: 0 0 1.8rem; letter-spacing: -0.025em; }
+.feat-list { display: flex; flex-direction: column; gap: 1.05rem; }
+.feat-item { display: flex; gap: 0.85rem; align-items: flex-start; }
+.feat-dot { flex: none; width: 11px; height: 11px; border-radius: 3px; background: var(--accent); margin-top: 0.42rem; }
+.feat-t { font-family: var(--display); font-weight: 600; font-size: 1rem; }
+.feat-d { color: var(--muted); font-size: 0.9rem; margin-top: 0.15rem; max-width: 40ch; }
+.login-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-card); box-shadow: var(--shadow); padding: 2rem 2.1rem 1.7rem; }
+.login-card h2 { font-size: 1.35rem; margin-bottom: 0.5rem; }
+.login-card .btn.large { display: block; text-align: center; margin: 1.3rem 0 0; }
+.btn.large { padding: 0.7rem 1.4rem; font-size: 1rem; }
+.login-note { margin-top: 1rem; }

@@ -1,26 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>{{ T('login_title') }}</h1>
-<p class="muted">{{ T('login_intro') }}</p>
+<div class="login-wrap">
+  <div class="login-hero">
+    <div class="eyebrow">{{ T('login_eyebrow') }}</div>
+    <h1 class="login-headline">{{ T('login_headline') }}</h1>
+    <div class="feat-list">
+      <div class="feat-item">
+        <span class="feat-dot"></span>
+        <div>
+          <div class="feat-t">{{ T('login_feat1_t') }}</div>
+          <div class="feat-d">{{ T('login_feat1_d') }}</div>
+        </div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-dot"></span>
+        <div>
+          <div class="feat-t">{{ T('login_feat2_t') }}</div>
+          <div class="feat-d">{{ T('login_feat2_d') }}</div>
+        </div>
+      </div>
+      <div class="feat-item">
+        <span class="feat-dot"></span>
+        <div>
+          <div class="feat-t">{{ T('login_feat3_t') }}</div>
+          <div class="feat-d">{{ T('login_feat3_d') }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-{% if oauth_ready %}
-  <a class="btn primary" href="/auth/chpp/start">{{ T('login_with_ht') }}</a>
-{% else %}
-  <p class="notice">{{ T('login_oauth_missing') }}</p>
-{% endif %}
+  <div class="login-card">
+    <h2>{{ T('login_title') }}</h2>
+    <p class="muted">{{ T('login_intro') }}</p>
+    {% if oauth_ready %}
+      <a class="btn primary large" href="/auth/chpp/start">{{ T('login_with_ht') }}</a>
+    {% else %}
+      <p class="notice">{{ T('login_oauth_missing') }}</p>
+    {% endif %}
+    <p class="muted small-text login-note">{{ T('login_note') }}</p>
+  </div>
+</div>
 
 {% if settings.chpp_mock and personas %}
-  <h2>{{ T('login_mock_title') }}</h2>
-  <p class="muted">{{ T('login_mock_hint') }}</p>
-  <div class="cards">
-    {% for p in personas %}
-      <form method="post" action="/auth/mock" class="card persona">
-        <input type="hidden" name="ht_user_id" value="{{ p.ht_user_id }}">
-        <div class="card-title">{{ p.login_name }}</div>
-        <div class="muted">{{ T('role_' + p.role) }}</div>
-        <button class="btn" type="submit">{{ T('login_as') }}</button>
-      </form>
-    {% endfor %}
-  </div>
+  <section class="card">
+    <h2>{{ T('login_mock_title') }}</h2>
+    <p class="muted">{{ T('login_mock_hint') }}</p>
+    <div class="cards">
+      {% for p in personas %}
+        <form method="post" action="/auth/mock" class="card persona">
+          <input type="hidden" name="ht_user_id" value="{{ p.ht_user_id }}">
+          <div class="card-title">{{ p.login_name }}</div>
+          <div class="muted">{{ T('role_' + p.role) }}</div>
+          <button class="btn" type="submit">{{ T('login_as') }}</button>
+        </form>
+      {% endfor %}
+    </div>
+  </section>
 {% endif %}
 {% endblock %}

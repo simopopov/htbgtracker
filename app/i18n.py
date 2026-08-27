@@ -213,6 +213,15 @@ STRINGS: dict[str, dict[str, str]] = {
     "f_squad": {"en": "National squad", "bg": "Гарнитура"},
     "f_target_skill": {"en": "Target training skill", "bg": "Целево умение за трениране"},
     "f_est_price": {"en": "Estimated price", "bg": "Очаквана цена"},
+    "f_plan": {"en": "Training plan (rough)", "bg": "Тренировъчен план (груб)"},
+    "f_plan_hint": {
+        "en": "at least one row; trainers of ANY listed skill will match",
+        "bg": "поне един ред; подходящи са трениращите на КОЕТО И ДА Е от умeнията",
+    },
+    "fl_plan_required": {
+        "en": "Add at least one training-plan row.",
+        "bg": "Добавете поне един ред в тренировъчния план.",
+    },
     "f_market_status": {"en": "Market status", "bg": "Пазарен статус"},
     "f_expected_listing": {"en": "Expected listing date", "bg": "Очаквана дата на обявяване"},
     "f_notes": {"en": "Scout notes", "bg": "Бележки на скаута"},

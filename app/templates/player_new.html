@@ -12,11 +12,23 @@
       {% for s in nt_squads %}<option value="{{ s }}">{{ T('squad_' + s) }}</option>{% endfor %}
     </select>
   </label>
-  <label>{{ T('f_target_skill') }}
-    <select name="target_skill">
-      {% for s in training_skills %}<option value="{{ s }}">{{ T('skill_' + s) }}</option>{% endfor %}
-    </select>
-  </label>
+  <fieldset class="wide plan-grid">
+    <legend>{{ T('f_plan') }} <span class="muted small-text">— {{ T('f_plan_hint') }}</span></legend>
+    {% for i in [1, 2, 3] %}
+    <label>{{ T('plan_col_skill') }} {{ i }}
+      <select name="plan_skill_{{ i }}">
+        {% if i > 1 %}<option value="">—</option>{% endif %}
+        {% for s in training_skills %}<option value="{{ s }}">{{ T('skill_' + s) }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>{{ T('plan_col_weeks') }}
+      <input type="number" name="plan_weeks_{{ i }}" min="1" max="112">
+    </label>
+    <label>{{ T('plan_col_stamina') }}
+      <input type="number" name="plan_stamina_{{ i }}" min="0" max="100">
+    </label>
+    {% endfor %}
+  </fieldset>
   <label>{{ T('f_est_price') }}
     <input type="text" name="estimated_price" placeholder="2500000">
   </label>

@@ -136,6 +136,21 @@ def test_rank_horizon_warning():
     assert not any(k == "warn_horizon_short" for k, _ in by_name["endless"].warnings)
 
 
+def test_rank_matches_any_plan_skill():
+    # A winger whose plan also needs playmaking fits a playmaking trainer.
+    p = player(target_skill="winger", estimated_price=None)
+    p.plan_steps = [
+        models.TrainingPlanStep(skill="winger", weeks=20, position=1),
+        models.TrainingPlanStep(skill="playmaking", weeks=16, position=2),
+    ]
+    pm = (user("pm"), profile(training_type="playmaking"),
+          [decl(slot_type="playmaking")])
+    results = rank_trainers(p, [pm], NOW)
+    keys = [k for k, _ in results[0].reasons]
+    assert "reason_training_match" in keys
+    assert "reason_slot_declared" in keys
+
+
 def test_rank_declaration_requirements():
     p = player(estimated_price=2_000_000)
     p.age_years = 17

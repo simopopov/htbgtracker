@@ -22,6 +22,18 @@ def renew(decl: models.Declaration, now: datetime, days: int = models.DEFAULT_DE
     decl.status = "active"
 
 
+def plan_skills(player: models.TrackedPlayer) -> list[str]:
+    """The skills the player's training plan calls for, in plan order —
+    a trainer training ANY of them is a fit. Falls back to target_skill."""
+    skills = []
+    for step in getattr(player, "plan_steps", []) or []:
+        if step.skill not in skills:
+            skills.append(step.skill)
+    if not skills and player.target_skill:
+        skills.append(player.target_skill)
+    return skills
+
+
 def _has_requirements(decl: models.Declaration) -> bool:
     return bool(
         decl.min_age or decl.max_age or decl.specialty_id is not None
@@ -75,7 +87,8 @@ def rank_trainers(player: models.TrackedPlayer, bundles, now: datetime) -> list[
             continue
         r = MatchResult(user=user, profile=profile)
 
-        if profile.training_type == player.target_skill:
+        wanted = plan_skills(player)
+        if profile.training_type in wanted:
             r.score += 40
             r.reasons.append(("reason_training_match", {}))
         else:
@@ -83,7 +96,8 @@ def rank_trainers(player: models.TrackedPlayer, bundles, now: datetime) -> list[
 
         active = [
             d for d in declarations
-            if declaration_active(d, now) and d.slot_type in (player.target_skill, "any")
+            if declaration_active(d, now)
+            and (d.slot_type == "any" or d.slot_type in wanted)
         ]
         r.active_declarations = active
         if active:

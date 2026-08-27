@@ -13,7 +13,7 @@ from ..db import get_db
 from ..render import render
 from ..services import outreach
 from ..services.capacity import budget_band
-from ..services.matching import declaration_active, rank_trainers
+from ..services.matching import declaration_active, plan_skills, rank_trainers
 from ..services.sync import SyncThrottled, sync_tracked_player
 from ..util import last_u21_match, parse_date, parse_int, parse_money, u21_until
 
@@ -151,16 +151,19 @@ def players_list(
         q = q.filter(models.TrackedPlayer.market_status == status)
     if squad:
         q = q.filter(models.TrackedPlayer.squad == squad)
-    if skill:
-        q = q.filter(models.TrackedPlayer.target_skill == skill)
     players = q.order_by(models.TrackedPlayer.created_at.desc()).all()
     now = datetime.utcnow()
     rows = []
     for p in players:
+        skills = plan_skills(p)
+        # The skill filter matches ANY skill in the training plan.
+        if skill and skill not in skills:
+            continue
         claim = next((c for c in p.claims if c.status == "active"), None)
         until = u21_until(p.age_years, p.age_days, p.last_public_sync or p.created_at)
         rows.append({
             "player": p,
+            "skills": skills,
             "claim": claim,
             "open_interests": sum(1 for i in p.interests if i.status == "open"),
             "u21_until": until,
@@ -192,51 +195,56 @@ def player_new_form(request: Request, db: Session = Depends(get_db)):
 
 
 @router.post("/players/new")
-def player_new(
-    request: Request,
-    ht_player_id: int = Form(...),
-    squad: str = Form("u21"),
-    target_skill: str = Form(...),
-    estimated_price: str = Form(""),
-    market_status: str = Form("watching"),
-    expected_listing: str = Form(""),
-    notes: str = Form(""),
-    sk_goalkeeping: str = Form(""),
-    sk_defending: str = Form(""),
-    sk_playmaking: str = Form(""),
-    sk_winger: str = Form(""),
-    sk_passing: str = Form(""),
-    sk_scoring: str = Form(""),
-    sk_set_pieces: str = Form(""),
-    sk_stamina: str = Form(""),
-    db: Session = Depends(get_db),
-):
+async def player_new(request: Request, db: Session = Depends(get_db)):
     user, resp = _guard_scout(request, db)
     if resp:
         return resp
+    form = await request.form()
+    ht_player_id = parse_int(form.get("ht_player_id"))
+    if ht_player_id is None:
+        return RedirectResponse("/players/new", status_code=303)
     existing = db.query(models.TrackedPlayer).filter(models.TrackedPlayer.ht_player_id == ht_player_id).first()
     if existing:
         security.flash(request, "fl_player_exists")
         return RedirectResponse(f"/players/{existing.id}", status_code=303)
-    if target_skill not in models.TRAINING_SKILLS:
-        target_skill = models.TRAINING_SKILLS[0]
+
+    # The rough training plan (up to 3 rows) replaces the single target
+    # skill; at least one row is required.
+    steps = []
+    for i in (1, 2, 3):
+        skill = form.get(f"plan_skill_{i}") or ""
+        if skill in models.TRAINING_SKILLS:
+            steps.append({
+                "skill": skill,
+                "weeks": _clamp(parse_int(form.get(f"plan_weeks_{i}")), 1, 112),
+                "stamina": _clamp(parse_int(form.get(f"plan_stamina_{i}")), 0, 100),
+            })
+    if not steps:
+        security.flash(request, "fl_plan_required")
+        return RedirectResponse("/players/new", status_code=303)
+
+    squad = form.get("squad", "u21")
+    market_status = form.get("market_status", "watching")
     player = models.TrackedPlayer(
         ht_player_id=ht_player_id,
         squad=squad if squad in models.NT_SQUADS else "u21",
-        target_skill=target_skill,
-        estimated_price=parse_money(estimated_price),
+        target_skill=steps[0]["skill"],
+        estimated_price=parse_money(form.get("estimated_price")),
         market_status=market_status if market_status in models.MARKET_STATUSES else "watching",
-        expected_listing=parse_date(expected_listing),
-        notes=notes.strip(),
+        expected_listing=parse_date(form.get("expected_listing")),
+        notes=(form.get("notes") or "").strip(),
         added_by_id=user.id,
         skills=_skills_from_form({
-            "goalkeeping": sk_goalkeeping, "defending": sk_defending,
-            "playmaking": sk_playmaking, "winger": sk_winger,
-            "passing": sk_passing, "scoring": sk_scoring,
-            "set_pieces": sk_set_pieces, "stamina": sk_stamina,
+            s: form.get(f"sk_{s}") or "" for s in models.PLAYER_SKILLS
         }),
     )
     db.add(player)
+    db.flush()
+    for pos, step in enumerate(steps, start=1):
+        db.add(models.TrainingPlanStep(
+            player_id=player.id, position=pos,
+            skill=step["skill"], weeks=step["weeks"], stamina_share=step["stamina"],
+        ))
     db.commit()
     try:
         sync_tracked_player(db, player, user, force=True)
@@ -421,6 +429,9 @@ def plan_add(
         weeks=_clamp(parse_int(weeks), 1, 112),
         stamina_share=_clamp(parse_int(stamina_share), 0, 100),
     ))
+    db.flush()
+    db.expire(player, ["plan_steps"])
+    player.target_skill = player.plan_steps[0].skill
     db.commit()
     security.flash(request, "fl_saved")
     return RedirectResponse(f"/players/{pid}", status_code=303)
@@ -435,7 +446,12 @@ def plan_delete(request: Request, sid: int, db: Session = Depends(get_db)):
     if step is None:
         return RedirectResponse("/players", status_code=303)
     pid = step.player_id
+    player = step.player
     db.delete(step)
+    db.flush()
+    db.expire(player, ["plan_steps"])
+    if player.plan_steps:
+        player.target_skill = player.plan_steps[0].skill
     db.commit()
     security.flash(request, "fl_saved")
     return RedirectResponse(f"/players/{pid}", status_code=303)

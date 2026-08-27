@@ -28,7 +28,7 @@
       <div class="muted small-text"><a href="{{ r.url }}" target="_blank" rel="noopener">{{ T('hattrick_page') }}</a></div>
     </td>
     <td>{% if r.player.age_years is not none %}{{ r.player.age_years }}.{{ r.player.age_days }}{% else %}—{% endif %}</td>
-    <td>{{ T('skill_' + r.player.target_skill) }}
+    <td>{% for s in r.skills %}{{ T('skill_' + s) }}{% if not loop.last %} + {% endif %}{% endfor %}
       {% if r.player.plan_steps %}
       <div class="muted small-text">
         {% for step in r.player.plan_steps %}{{ loop.index }}. {{ T('skill_' + step.skill) }} ~{{ step.weeks if step.weeks is not none else '?' }} {{ T('plan_weeks_short') }} / {{ step.stamina_share if step.stamina_share is not none else '?' }}%{% if not loop.last %} · {% endif %}{% endfor %}

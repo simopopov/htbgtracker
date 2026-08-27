@@ -11,7 +11,7 @@ from ..chpp.errors import CHPPError
 from ..db import get_db
 from ..render import render
 from ..services import outreach
-from ..services.matching import declaration_active, renew
+from ..services.matching import declaration_active, plan_skills, renew
 from ..services.sync import (
     SyncThrottled,
     TeamChoiceRequired,
@@ -250,7 +250,8 @@ def market(request: Request, only_mine: str = "", db: Session = Depends(get_db))
     players = q.order_by(models.TrackedPlayer.expected_listing.is_(None), models.TrackedPlayer.expected_listing).all()
     rows = []
     for p in players:
-        if only_mine and profile is not None and p.target_skill != profile.training_type:
+        skills = plan_skills(p)
+        if only_mine and profile is not None and profile.training_type not in skills:
             continue
         mine = None
         if profile is not None:
@@ -258,6 +259,7 @@ def market(request: Request, only_mine: str = "", db: Session = Depends(get_db))
         claim = next((c for c in p.claims if c.status == "active"), None)
         rows.append({
             "player": p,
+            "skills": skills,
             "my_interest": mine,
             "claim": claim,
             "scout_compose": outreach.compose_url(claim.scout.ht_user_id) if claim else None,

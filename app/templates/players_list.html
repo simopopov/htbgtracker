@@ -54,7 +54,7 @@
       {% endif %}
     </td>
     <td><span class="badge">{{ T('squad_' + r.player.squad) }}</span></td>
-    <td>{{ T('skill_' + r.player.target_skill) }}</td>
+    <td>{% for s in r.skills %}{{ T('skill_' + s) }}{% if not loop.last %} + {% endif %}{% endfor %}</td>
     <td>{{ r.player.estimated_price|money }}</td>
     <td><span class="badge status-{{ r.player.market_status }}">{{ T('status_' + r.player.market_status) }}</span>
       {% if r.player.expected_listing %}<div class="muted small-text">{{ r.player.expected_listing|date }}</div>{% endif %}

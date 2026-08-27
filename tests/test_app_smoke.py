@@ -57,9 +57,11 @@ def test_scout_flow(client):
     # Add a new player -> public data auto-fills from the mock fixture.
     r = client.post("/players/new", data={
         "ht_player_id": "5004",
-        "name": "",
         "squad": "u21",
-        "target_skill": "goalkeeping",
+        "plan_skill_1": "goalkeeping",
+        "plan_weeks_1": "40",
+        "plan_skill_2": "set_pieces",
+        "plan_weeks_2": "10",
         "estimated_price": "900000",
         "market_status": "watching",
         "expected_listing": "",

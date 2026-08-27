@@ -141,6 +141,9 @@ textarea { width: 100%; }
 .skills-grid legend { font-size: 0.8rem; color: var(--muted); padding: 0 0.3rem; }
 .skills-grid label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.78rem; color: var(--muted); }
 .skill-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.plan-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.6rem; border: 1px solid var(--line); border-radius: var(--r-card); padding: 0.9rem; }
+.plan-grid legend { font-size: 0.85rem; color: var(--muted); padding: 0 0.3rem; }
+.plan-grid label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.78rem; color: var(--muted); }
 .req-pair { display: flex; gap: 0.35rem; }
 .req-pair input { width: 100%; min-width: 0; }
 .interest-form { display: flex; gap: 0.4rem; align-items: center; }

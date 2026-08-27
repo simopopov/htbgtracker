@@ -55,7 +55,13 @@
   <tr {% if r.stale %}class="stale"{% endif %}>
     <td><strong>{{ r.profile.team_name }}</strong><br><span class="muted">{{ r.profile.user.login_name }}</span></td>
     <td><span class="badge">{{ T('skill_' + r.profile.training_type) if r.profile.training_type != 'other' else T('skill_other') }}</span></td>
-    <td>{{ level_name(r.profile.coach_level) }}</td>
+    <td>{{ level_name(r.profile.coach_level) }}
+      {% if r.profile.staff %}
+      <div class="muted small-text">
+        {% for s in r.profile.staff %}{{ T('staff_type_' + s.type|string) }} {{ s.level }}{% if not loop.last %} · {% endif %}{% endfor %}
+      </div>
+      {% endif %}
+    </td>
     <td>{{ T('occupancy_line', trained=r.trained, total=r.squad_size) }}</td>
     <td>
       {% if can_see_exact %}

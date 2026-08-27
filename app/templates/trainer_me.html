@@ -16,6 +16,11 @@
     <div class="kv">
       <div><span>{{ T('me_training_type') }}</span>{{ T('skill_' + profile.training_type) if profile.training_type != 'other' else T('skill_other') }}</div>
       <div><span>{{ T('coach_level') }}</span>{{ level_name(profile.coach_level) }}</div>
+      <div><span>{{ T('me_staff') }}</span>
+        {% if profile.staff %}
+          {% for s in profile.staff %}{{ T('staff_type_' + s.type|string) }} {{ s.level }}{% if not loop.last %}, {% endif %}{% endfor %}
+        {% else %}—{% endif %}
+      </div>
       <div><span>{{ T('me_intensity') }}</span>{{ profile.training_intensity if profile.training_intensity is not none else '—' }}%</div>
       <div><span>{{ T('me_stamina') }}</span>{{ profile.stamina_share if profile.stamina_share is not none else '—' }}%</div>
       <div><span>{{ T('me_cash') }}</span>{{ profile.cash|money }}{% if profile.currency_name %} {{ profile.currency_name }}{% endif %}</div>

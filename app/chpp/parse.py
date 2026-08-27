@@ -163,6 +163,28 @@ def parse_training(xml: str) -> dict:
     }
 
 
+def parse_stafflist(xml: str) -> dict:
+    """Trainer + staff from stafflist v1.2. TrainerSkillLevel is the modern
+    1–5 coach scale; StaffType/StaffLevel describe the specialists."""
+    root = ET.fromstring(xml)
+    container = root.find("StaffList")
+    base = container if container is not None else root
+    staff = []
+    members = base.find("StaffMembers")
+    if members is not None:
+        for s in members.findall("Staff"):
+            staff.append({
+                "type": _i(s, "StaffType"),
+                "level": _i(s, "StaffLevel"),
+                "name": _t(s, "Name", ""),
+            })
+    return {
+        "trainer_skill_level": _i(base, "Trainer/TrainerSkillLevel"),
+        "trainer_name": _t(base, "Trainer/Name", ""),
+        "staff": staff,
+    }
+
+
 def parse_economy(xml: str) -> dict:
     root = ET.fromstring(xml)
     team = root.find("Team")

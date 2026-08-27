@@ -14,6 +14,7 @@ from ..chpp.parse import (
     parse_economy,
     parse_playerdetails,
     parse_players,
+    parse_stafflist,
     parse_teamdetails,
     parse_training,
     parse_worlddetails,
@@ -182,9 +183,20 @@ def sync_trainer(
     profile.training_type = TRAINING_TYPE_TO_SKILL.get(tt, "other") if tt is not None else "other"
     profile.training_intensity = tr["training_level"]
     profile.stamina_share = tr["stamina_part"]
-    # Coach level: training.xml carries none (only TrainerID/Name), so the
-    # real source is the coach's TrainerData in players.xml.
-    profile.coach_level = tr["coach_level"] or coach_level_from_squad(squad)
+    # Coach level: stafflist is the authoritative source (works for hired,
+    # non-player coaches too); fall back to the coach's TrainerData in
+    # players.xml (player-coaches), then to any training.xml variant.
+    staff_coach = None
+    try:
+        sl = parse_stafflist(chpp.fetch("stafflist", "1.2", teamId=team_id))
+        if sl["trainer_skill_level"]:
+            staff_coach = sl["trainer_skill_level"] + 3  # 1–5 → denominations
+        profile.staff = sl["staff"] or None
+    except CHPPError:
+        pass  # no stafflist available — keep whatever we have
+    profile.coach_level = (
+        staff_coach or tr["coach_level"] or coach_level_from_squad(squad)
+    )
     profile.assistant_level = tr["assistant_level"]
 
     # CHPP money is SEK — convert to the league's local currency.

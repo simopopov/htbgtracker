@@ -248,8 +248,10 @@ def test_sync_throttle_and_owner_force(client):
     assert "refreshed from CHPP" in r.text
     # Mock worlddetails has rate 1 / € — currency shows, values unchanged.
     assert "9 800 000 €" in r.text
-    # Coach level fell back to the coach's TrainerData (level 7 = solid).
+    # Coach level from stafflist (4/5 → solid) and the specialists list.
     assert "solid" in r.text
+    assert "Assistant coach 5" in r.text
+    assert "Form coach 4" in r.text
 
 
 def test_comments_replies_and_mail_modal(client):

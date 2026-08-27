@@ -68,6 +68,14 @@ def test_error_envelope_raises_59():
     assert isinstance(error_for_code(code, msg), NotAuthorizedByOwner)
 
 
+def test_parse_stafflist():
+    d = parse.parse_stafflist(read("stafflist_1001.xml"))
+    assert d["trainer_skill_level"] == 4  # modern 1–5 coach scale
+    assert d["trainer_name"] == "Dimo Karadzhov"
+    assert len(d["staff"]) == 3
+    assert d["staff"][0] == {"type": 1, "level": 5, "name": "Petar Stoev"}
+
+
 def test_parse_worlddetails_and_comma_rate():
     xml = read("worlddetails.xml")
     mock = parse.parse_worlddetails(xml, 50)

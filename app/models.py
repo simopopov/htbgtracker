@@ -69,6 +69,8 @@ class TrainerProfile(Base):
     stamina_share: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     coach_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     assistant_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # Staff specialists from stafflist: [{"type": id, "level": n, "name": …}]
+    staff: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
     # CHPP returns money in SEK (Hattrick's internal currency); sync converts
     # to the team's local currency via the worlddetails CurrencyRate, and the
     # rate/name used are recorded here.

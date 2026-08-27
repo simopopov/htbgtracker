@@ -57,6 +57,7 @@ _COLUMN_MIGRATIONS = [
     ("declarations", "max_age", "INTEGER"),
     ("declarations", "specialty_id", "INTEGER"),
     ("declarations", "skill_reqs", "TEXT"),
+    ("trainer_profiles", "staff", "TEXT"),
 ]
 
 # Columns retired by the declaration redesign (requirements instead of

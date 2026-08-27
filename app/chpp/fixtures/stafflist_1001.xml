@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>stafflist.xml</FileName>
+  <Version>1.2</Version>
+  <UserID>201</UserID>
+  <FetchedDate>2026-08-27 08:00:00</FetchedDate>
+  <StaffList>
+    <Trainer>
+      <TrainerId>90001</TrainerId>
+      <Name>Dimo Karadzhov</Name>
+      <TrainerType>2</TrainerType>
+      <Leadership>5</Leadership>
+      <TrainerSkillLevel>4</TrainerSkillLevel>
+      <TrainerStatus>1</TrainerStatus>
+    </Trainer>
+    <StaffMembers>
+      <Staff>
+        <StaffId>70001</StaffId>
+        <Name>Petar Stoev</Name>
+        <StaffType>1</StaffType>
+        <StaffLevel>5</StaffLevel>
+      </Staff>
+      <Staff>
+        <StaffId>70002</StaffId>
+        <Name>Ivo Draganov</Name>
+        <StaffType>2</StaffType>
+        <StaffLevel>3</StaffLevel>
+      </Staff>
+      <Staff>
+        <StaffId>70003</StaffId>
+        <Name>Krum Vasilev</Name>
+        <StaffType>5</StaffType>
+        <StaffLevel>4</StaffLevel>
+      </Staff>
+    </StaffMembers>
+    <TotalStaffMembers>4</TotalStaffMembers>
+  </StaffList>
+</HattrickData>

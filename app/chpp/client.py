@@ -33,6 +33,7 @@ _KEY_PARAM = {
     "players": "teamid",
     "training": "teamid",
     "economy": "teamid",
+    "stafflist": "teamid",
 }
 
 

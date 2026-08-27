@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
@@ -57,7 +59,12 @@ def chpp_start(request: Request):
     if settings.chpp_mock or not settings.chpp_consumer_key:
         security.flash(request, "fl_oauth_unavailable")
         return RedirectResponse("/login", status_code=303)
-    tokens = chpp_client.oauth_request_token(f"{settings.base_url}/auth/chpp/callback")
+    try:
+        tokens = chpp_client.oauth_request_token(f"{settings.base_url}/auth/chpp/callback")
+    except Exception:
+        logging.exception("CHPP request-token step failed")
+        security.flash(request, "fl_oauth_failed")
+        return RedirectResponse("/login", status_code=303)
     request.session["rt"] = tokens["oauth_token"]
     request.session["rts"] = tokens["oauth_token_secret"]
     return RedirectResponse(chpp_client.oauth_authorize_url(tokens["oauth_token"]), status_code=303)
@@ -68,12 +75,20 @@ def chpp_callback(request: Request, oauth_token: str = "", oauth_verifier: str =
     rt = request.session.pop("rt", None)
     rts = request.session.pop("rts", None)
     if not rt or not oauth_verifier:
-        security.flash(request, "fl_oauth_unavailable")
+        # Lost session cookie, a refreshed/stale callback URL, or a denied
+        # authorization (no verifier) — send them back to try again.
+        security.flash(request, "fl_oauth_failed")
         return RedirectResponse("/login", status_code=303)
-    access = chpp_client.oauth_access_token(rt, rts, oauth_verifier)
-
-    chpp = chpp_client.get_client(access["oauth_token"], access["oauth_token_secret"])
-    td = parse_teamdetails(chpp.fetch("teamdetails", "3.9"))
+    try:
+        access = chpp_client.oauth_access_token(rt, rts, oauth_verifier)
+        chpp = chpp_client.get_client(access["oauth_token"], access["oauth_token_secret"])
+        td = parse_teamdetails(chpp.fetch("teamdetails", "3.9"))
+    except Exception:
+        # Denied authorization, expired request token, or CHPP hiccup — a
+        # user-facing retry message beats a bare 500.
+        logging.exception("CHPP login failed at token exchange / identity fetch")
+        security.flash(request, "fl_oauth_failed")
+        return RedirectResponse("/login", status_code=303)
     ht_user_id = td["user"]["ht_user_id"]
     login_name = td["user"]["login_name"] or f"user-{ht_user_id}"
 

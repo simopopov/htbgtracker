@@ -400,6 +400,10 @@ STRINGS: dict[str, dict[str, str]] = {
     "fl_not_found": {"en": "Not found.", "bg": "Не е намерено."},
     "fl_unknown_persona": {"en": "Unknown demo persona.", "bg": "Непознат демо потребител."},
     "fl_oauth_unavailable": {"en": "Live CHPP login is not available.", "bg": "Истинският CHPP вход не е достъпен."},
+    "fl_oauth_failed": {
+        "en": "Signing in with Hattrick didn't go through — please try again from the button below.",
+        "bg": "Входът през Hattrick не мина — опитайте отново от бутона по-долу.",
+    },
     "fl_player_exists": {"en": "This player is already in the registry.", "bg": "Този играч вече е в регистъра."},
     "fl_player_deleted": {"en": "Player removed from the registry.", "bg": "Играчът е премахнат от регистъра."},
     "confirm_delete": {

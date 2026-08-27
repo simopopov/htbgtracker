@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.pool import NullPool
 
 from .config import settings
 
@@ -8,8 +9,26 @@ class Base(DeclarativeBase):
     pass
 
 
-connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
-engine = create_engine(settings.database_url, connect_args=connect_args)
+def _make_engine():
+    url = settings.database_url
+    if url.startswith("sqlite"):
+        return create_engine(url, connect_args={"check_same_thread": False})
+    # Postgres (Supabase): normalize the URL onto the psycopg3 driver.
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        url = "postgresql+psycopg://" + url[len("postgresql://"):]
+    # Serverless-friendly: no client-side pool (each invocation is short-
+    # lived; Supabase's Supavisor pooler does the pooling), and no prepared
+    # statements (transaction-mode pooling breaks them).
+    return create_engine(
+        url,
+        poolclass=NullPool,
+        connect_args={"prepare_threshold": None},
+    )
+
+
+engine = _make_engine()
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 

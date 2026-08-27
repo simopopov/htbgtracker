@@ -1,78 +1,68 @@
-# Deployment (Hetzner VPS + GitHub Actions CI/CD)
+# Deployment — Vercel + Supabase (free tiers)
 
-Push to `main` → tests run → on green, GitHub Actions deploys to the server
-over SSH and restarts the service. No manual SSH after the one-time setup.
+Push to `main` → GitHub Actions runs the tests, Vercel's git integration
+builds and deploys. Postgres lives in Supabase. Total cost: 0.
 
 ## One-time setup
 
-### 1. GitHub repo
+### 1. Supabase
 
-```bash
-git push -u origin main       # after creating the repo on GitHub
-```
+1. supabase.com → New project (region: EU/Frankfurt). Save the DB password.
+2. Project → Connect → copy two connection strings:
+   - **Transaction pooler** (port 6543) → the app's `DATABASE_URL`
+   - **Session pooler** (port 5432) → GitHub secret `SUPABASE_DB_URL`
+     (for backups; the direct host is IPv6-only and won't work from CI)
 
-### 2. Server (Hetzner CX23, Ubuntu 24.04)
+Tables are created automatically on the first cold start (`init_db`).
 
-As root on the fresh server:
+### 2. Vercel
 
-```bash
-# Give the server read access to the repo (skip if the repo is public):
-sudo -u htbg ssh-keygen -t ed25519 -N '' -f /home/htbg/.ssh/id_ed25519 || true
-cat /home/htbg/.ssh/id_ed25519.pub
-#   → add as a read-only Deploy Key: GitHub repo → Settings → Deploy keys
-# (the htbg user is created by bootstrap; run the keygen after step below
-#  errors on clone, or pre-create the user: useradd -m htbg)
+1. Push the repo to GitHub, then vercel.com → Add New Project → import it.
+   The included `vercel.json` + `api/index.py` make FastAPI work as-is.
+2. Project → Settings → Environment Variables:
 
-curl -fsSL https://raw.githubusercontent.com/<you>/<repo>/main/deploy/bootstrap.sh -o bootstrap.sh
-sudo bash bootstrap.sh git@github.com:<you>/<repo>.git <domain>
-```
+   | Variable | Value |
+   |---|---|
+   | `DATABASE_URL` | the **transaction pooler** string from Supabase |
+   | `SECRET_KEY` | long random string (`python3 -c "import secrets; print(secrets.token_urlsafe(48))"`) |
+   | `CHPP_MOCK` | `0` |
+   | `CHPP_CONSUMER_KEY` | from the CHPP product page |
+   | `CHPP_CONSUMER_SECRET` | from the CHPP product page |
+   | `BASE_URL` | `https://<project>.vercel.app` (or your domain) |
 
-`<domain>`: a real domain or a free DuckDNS subdomain pointed at the server
-IP. Caddy fetches the HTTPS certificate automatically.
+3. Deploy. Every later `git push` deploys automatically; PRs get preview
+   deployments (they share the same DB — don't run destructive experiments
+   from previews).
 
-Then fill in the CHPP keys:
+### 3. GitHub Actions plumbing
 
-```bash
-sudo nano /opt/htbg/.env    # CHPP_CONSUMER_KEY / CHPP_CONSUMER_SECRET
-sudo systemctl restart htbg
-```
-
-### 3. CI deploy key + GitHub secrets
-
-```bash
-# On your machine — a key used ONLY by GitHub Actions to reach the server:
-ssh-keygen -t ed25519 -N '' -f htbg-deploy-key
-ssh-copy-id -i htbg-deploy-key.pub htbg@<server-ip>   # or append to
-#   /home/htbg/.ssh/authorized_keys manually
-```
-
-GitHub repo → Settings → Secrets and variables → Actions:
-
-| Secret | Value |
-|---|---|
-| `SSH_HOST` | the server IP (or domain) |
-| `SSH_KEY` | contents of the **private** file `htbg-deploy-key` |
-
-Delete the local key files after adding the secret.
+- Repo → Settings → Secrets and variables → Actions:
+  - **Variable** `APP_URL` = `https://<project>.vercel.app`
+    (used by `keepalive.yml` — pings `/healthz` every 3 days so the free
+    Supabase project is never paused for inactivity)
+  - **Secret** `SUPABASE_DB_URL` = the session-pooler string
+    (used by `backup.yml` — weekly `pg_dump`, stored as a workflow artifact
+    for 90 days; Supabase free has no automated backups of its own)
 
 ### 4. CHPP settings
 
-In your CHPP product settings on hattrick.org, make sure the OAuth callback
-matches `https://<domain>/auth/chpp/callback` (the app sends it at request-
-token time from `BASE_URL`).
+Make sure the OAuth callback on the CHPP product page allows
+`https://<project>.vercel.app/auth/chpp/callback` (the app derives it from
+`BASE_URL`). The first user to log in on the fresh database becomes head
+coach.
 
-## Day-to-day
+## Notes
 
-- `git push` to `main` → tests → deploy → health check (`/login`).
-- Pull requests run tests only, no deploy.
-- DB migrations run automatically at app startup (`init_db`).
-- Backups: daily 04:10 to `/opt/htbg/backups/`, 14-day rotation. Copy them
-  off-server occasionally: `scp htbg@<server>:/opt/htbg/backups/*.gz .`
+- Local development is unchanged: SQLite + mock mode (`CHPP_MOCK=1`).
+- The SQLite column migrations don't apply to Postgres; a fresh Supabase DB
+  gets the full schema from `create_all`. Future schema changes on a live
+  Postgres DB need an `ALTER TABLE` run in the Supabase SQL editor (or a
+  proper migration tool if this grows).
+- Restoring a backup: `gunzip -c backup-YYYYMMDD.sql.gz | psql "<session-pooler-url>"`.
+- If the DB was still paused for any reason: Supabase dashboard → Restore.
 
-## Useful commands on the server
+## Alternative: self-hosted VPS
 
-```bash
-systemctl status htbg           # is it running
-journalctl -u htbg -n 100 -f    # app logs
-systemctl reload caddy          # after editing /etc/caddy/Caddyfile
-```
+The `deploy/` folder keeps a complete Hetzner/Ubuntu setup (systemd + Caddy
++ SSH deploy + daily SQLite backups) in case the project ever outgrows the
+free tiers or wants to leave them. See the scripts' headers for usage.

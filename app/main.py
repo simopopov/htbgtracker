@@ -1,12 +1,15 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
+from . import models
 from .config import settings
-from .db import init_db
+from .db import get_db, init_db
 from .routers import admin, auth, dashboard, scout, trainer
 from .seed import seed_if_empty
 
@@ -28,3 +31,11 @@ app.include_router(dashboard.router)
 app.include_router(scout.router)
 app.include_router(trainer.router)
 app.include_router(admin.router)
+
+
+@app.get("/healthz")
+def healthz(db: Session = Depends(get_db)):
+    """Liveness + keep-alive: the query counts as database activity, which
+    keeps a Supabase free-tier project from being paused for inactivity."""
+    users = db.execute(select(func.count(models.User.id))).scalar_one()
+    return {"ok": True, "users": users}

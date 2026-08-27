@@ -36,6 +36,20 @@ def user(name="u"):
     return models.User(ht_user_id=1, login_name=name)
 
 
+def test_u21_until():
+    from app.util import u21_until
+
+    # 17y 32d at the snapshot: 22*112 - (17*112 + 32) = 528 days remain.
+    until = u21_until(17, 32, NOW)
+    assert (until - NOW).days == 528
+    # 21y 111d: one day before the 22nd birthday.
+    assert (u21_until(21, 111, NOW) - NOW).days == 1
+    # Already 22 → the date lies in the past.
+    assert u21_until(22, 4, NOW) < NOW
+    assert u21_until(None, 30, NOW) is None
+    assert u21_until(17, 32, None) is None
+
+
 def test_budget_bands_edges():
     assert budget_band(None) == "band_unknown"
     assert budget_band(0) == "band_0"

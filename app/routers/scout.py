@@ -15,7 +15,7 @@ from ..services import outreach
 from ..services.capacity import budget_band
 from ..services.matching import declaration_active, rank_trainers
 from ..services.sync import SyncThrottled, sync_tracked_player
-from ..util import parse_date, parse_int, parse_money
+from ..util import parse_date, parse_int, parse_money, u21_until
 
 router = APIRouter()
 
@@ -154,13 +154,17 @@ def players_list(
     if skill:
         q = q.filter(models.TrackedPlayer.target_skill == skill)
     players = q.order_by(models.TrackedPlayer.created_at.desc()).all()
+    now = datetime.utcnow()
     rows = []
     for p in players:
         claim = next((c for c in p.claims if c.status == "active"), None)
+        until = u21_until(p.age_years, p.age_days, p.last_public_sync or p.created_at)
         rows.append({
             "player": p,
             "claim": claim,
             "open_interests": sum(1 for i in p.interests if i.status == "open"),
+            "u21_until": until,
+            "u21_weeks": max(0, (until - now).days // 7) if until else None,
         })
     return render(request, "players_list.html", {
         "rows": rows,
@@ -264,6 +268,7 @@ def player_detail(request: Request, pid: int, db: Session = Depends(get_db)):
     claim = next((c for c in player.claims if c.status == "active"), None)
     interests = sorted(player.interests, key=lambda i: i.created_at, reverse=True)
     locale = security.locale_of(request)
+    until = u21_until(player.age_years, player.age_days, player.last_public_sync or player.created_at)
 
     ctx = {
         "player": player,
@@ -274,6 +279,9 @@ def player_detail(request: Request, pid: int, db: Session = Depends(get_db)):
         "market_statuses": models.MARKET_STATUSES,
         "player_skills": models.PLAYER_SKILLS,
         "specialty_ids": models.SPECIALTY_IDS,
+        "u21_until": until,
+        "u21_weeks": max(0, (until - now).days // 7) if until else None,
+        "u21_expired": bool(until and until <= now),
         "matches": [],
         "my_interest": None,
         "scout_compose": None,

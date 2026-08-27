@@ -18,6 +18,16 @@
     <div><span>{{ T('pd_owner') }}</span>{{ player.owner_team_name or '—' }}</div>
     <div><span>{{ T('pd_caps') }}</span>{{ player.caps if player.caps is not none else '—' }} / U20: {{ player.caps_u20 if player.caps_u20 is not none else '—' }}</div>
     <div><span>{{ T('pd_nt') }}</span>{% if player.national_team_id %}<span class="badge ok-badge">{{ player.national_team_name or player.national_team_id }}</span>{% else %}—{% endif %}</div>
+    <div><span>{{ T('pd_u21_until') }}</span>
+      {% if u21_until %}
+        {% if u21_expired %}
+          <span class="badge warn">{{ T('u21_expired') }}</span>
+        {% else %}
+          {{ u21_until|date }} <span class="badge">{{ T('u21_weeks_left', n=u21_weeks) }}</span>
+        {% endif %}
+        <div class="muted small-text"><a href="https://www.northkilttown.com/u21.php" target="_blank" rel="noopener">{{ T('u21_match_link') }}</a></div>
+      {% else %}—{% endif %}
+    </div>
     {% if player.market_status == 'listed' %}
     <div><span>{{ T('pd_asking_price') }}</span>{{ player.asking_price|money }}{% if player.currency_name %} {{ player.currency_name }}{% endif %}</div>
     <div><span>{{ T('pd_deadline') }}</span>{{ player.deadline|date }}</div>

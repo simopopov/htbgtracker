@@ -48,7 +48,11 @@
   {% for r in rows %}
   <tr>
     <td><a href="/players/{{ r.player.id }}"><strong>{{ r.player.name or r.player.ht_player_id }}</strong></a></td>
-    <td>{% if r.player.age_years is not none %}{{ r.player.age_years }}.{{ r.player.age_days }}{% else %}—{% endif %}</td>
+    <td>{% if r.player.age_years is not none %}{{ r.player.age_years }}.{{ r.player.age_days }}{% else %}—{% endif %}
+      {% if r.u21_until and r.player.squad == 'u21' %}
+        <div class="muted small-text">{% if r.u21_weeks > 0 %}U21: {{ T('u21_weeks_left', n=r.u21_weeks) }}{% else %}<span class="badge warn">{{ T('u21_expired') }}</span>{% endif %}</div>
+      {% endif %}
+    </td>
     <td><span class="badge">{{ T('squad_' + r.player.squad) }}</span></td>
     <td>{{ T('skill_' + r.player.target_skill) }}</td>
     <td>{{ r.player.estimated_price|money }}</td>

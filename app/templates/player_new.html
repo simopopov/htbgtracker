@@ -7,9 +7,6 @@
   <label>{{ T('f_ht_player_id') }}
     <input type="number" name="ht_player_id" required min="1">
   </label>
-  <label>{{ T('f_name_opt') }}
-    <input type="text" name="name">
-  </label>
   <label>{{ T('f_squad') }}
     <select name="squad">
       {% for s in nt_squads %}<option value="{{ s }}">{{ T('squad_' + s) }}</option>{% endfor %}
@@ -18,17 +15,6 @@
   <label>{{ T('f_target_skill') }}
     <select name="target_skill">
       {% for s in training_skills %}<option value="{{ s }}">{{ T('skill_' + s) }}</option>{% endfor %}
-    </select>
-  </label>
-  <label>{{ T('f_age_years') }}
-    <input type="number" name="age_years" min="15" max="45">
-  </label>
-  <label>{{ T('f_age_days') }}
-    <input type="number" name="age_days" min="0" max="111">
-  </label>
-  <label>{{ T('f_specialty') }}
-    <select name="specialty">
-      {% for sid in specialty_ids %}<option value="{{ sid }}">{{ T('spec_id_' + sid|string) }}</option>{% endfor %}
     </select>
   </label>
   <label>{{ T('f_est_price') }}

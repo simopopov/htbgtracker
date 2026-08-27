@@ -118,19 +118,6 @@
     <label>{{ T('f_expected_listing') }}
       <input type="date" name="expected_listing" value="{% if player.expected_listing %}{{ player.expected_listing.strftime('%Y-%m-%d') }}{% endif %}">
     </label>
-    <label>{{ T('f_age_years') }}
-      <input type="number" name="age_years" min="15" max="45" value="{{ player.age_years if player.age_years is not none else '' }}">
-    </label>
-    <label>{{ T('f_age_days') }}
-      <input type="number" name="age_days" min="0" max="111" value="{{ player.age_days if player.age_days is not none else '' }}">
-    </label>
-    <label>{{ T('f_specialty') }}
-      <select name="specialty">
-        {% for sid in specialty_ids %}
-        <option value="{{ sid }}" {% if player.specialty_id == sid %}selected{% endif %}>{{ T('spec_id_' + sid|string) }}</option>
-        {% endfor %}
-      </select>
-    </label>
     <fieldset class="wide skills-grid">
       <legend>{{ T('skills_title') }} <span class="muted small-text">— {{ T('skills_hint') }}</span></legend>
       {% for s in player_skills %}

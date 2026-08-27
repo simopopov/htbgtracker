@@ -195,16 +195,12 @@ def player_new_form(request: Request, db: Session = Depends(get_db)):
 def player_new(
     request: Request,
     ht_player_id: int = Form(...),
-    name: str = Form(""),
     squad: str = Form("u21"),
     target_skill: str = Form(...),
     estimated_price: str = Form(""),
     market_status: str = Form("watching"),
     expected_listing: str = Form(""),
     notes: str = Form(""),
-    age_years: str = Form(""),
-    age_days: str = Form(""),
-    specialty: str = Form(""),
     sk_goalkeeping: str = Form(""),
     sk_defending: str = Form(""),
     sk_playmaking: str = Form(""),
@@ -226,7 +222,6 @@ def player_new(
         target_skill = models.TRAINING_SKILLS[0]
     player = models.TrackedPlayer(
         ht_player_id=ht_player_id,
-        name=name.strip(),
         squad=squad if squad in models.NT_SQUADS else "u21",
         target_skill=target_skill,
         estimated_price=parse_money(estimated_price),
@@ -234,9 +229,6 @@ def player_new(
         expected_listing=parse_date(expected_listing),
         notes=notes.strip(),
         added_by_id=user.id,
-        age_years=_clamp(parse_int(age_years), 15, 45),
-        age_days=_clamp(parse_int(age_days), 0, 111),
-        specialty_id=parse_int(specialty),
         skills=_skills_from_form({
             "goalkeeping": sk_goalkeeping, "defending": sk_defending,
             "playmaking": sk_playmaking, "winger": sk_winger,
@@ -370,9 +362,6 @@ def player_status(
     estimated_price: str = Form(""),
     expected_listing: str = Form(""),
     notes: str = Form(""),
-    age_years: str = Form(""),
-    age_days: str = Form(""),
-    specialty: str = Form(""),
     sk_goalkeeping: str = Form(""),
     sk_defending: str = Form(""),
     sk_playmaking: str = Form(""),
@@ -393,9 +382,6 @@ def player_status(
     player.estimated_price = parse_money(estimated_price)
     player.expected_listing = parse_date(expected_listing)
     player.notes = notes.strip()
-    player.age_years = _clamp(parse_int(age_years), 15, 45)
-    player.age_days = _clamp(parse_int(age_days), 0, 111)
-    player.specialty_id = parse_int(specialty)
     player.skills = _skills_from_form({
         "goalkeeping": sk_goalkeeping, "defending": sk_defending,
         "playmaking": sk_playmaking, "winger": sk_winger,

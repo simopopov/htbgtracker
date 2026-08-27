@@ -334,6 +334,13 @@ def test_multi_team_choice(client):
     assert "Connected" in r.text
     assert "Sasho United" in r.text
 
+    # Dual role: a scout with a connected team sees BOTH the scout sections
+    # and the trainer-interest form (with the bid limit) on a player page.
+    r = client.get("/players/1")
+    assert "Matching trainers" in r.text
+    assert "I want to train him" in r.text
+    assert 'name="max_bid"' in r.text
+
 
 def test_declaration_renew_and_market_visibility(client):
     login(client, 203)  # TishoTrainer has an expired declaration

@@ -324,15 +324,16 @@ def player_detail(request: Request, pid: int, db: Session = Depends(get_db)):
             }
             for m in matches
         ]
-    else:
-        profile = user.trainer_profile
-        if profile is not None:
-            ctx["my_interest"] = next(
-                (i for i in interests if i.profile_id == profile.id and i.status in ("open", "accepted")),
-                None,
-            )
-        if claim is not None:
-            ctx["scout_compose"] = outreach.compose_url(claim.scout.ht_user_id)
+    # A user with a connected team can raise trainer interest regardless of
+    # role — the head coach often trains players too.
+    profile = user.trainer_profile
+    if profile is not None:
+        ctx["my_interest"] = next(
+            (i for i in interests if i.profile_id == profile.id and i.status in ("open", "accepted")),
+            None,
+        )
+    if not security.is_scout(user) and claim is not None:
+        ctx["scout_compose"] = outreach.compose_url(claim.scout.ht_user_id)
 
     return render(request, "player_detail.html", ctx)
 

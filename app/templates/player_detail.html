@@ -214,10 +214,12 @@
   {% endfor %}
 </section>
 
-{% else %}
+{% endif %}
+
+{% if user.trainer_profile or not is_scout %}
 <section class="card">
   <h2>{{ T('pd_interest_title') }}</h2>
-  {% if claim %}
+  {% if not is_scout and claim %}
     <p class="muted">{{ T('pd_claimed_by') }} {{ claim.scout.login_name }}
       {% if scout_compose %}— <a href="{{ scout_compose }}" target="_blank" rel="noopener">{{ T('pd_contact_scout') }}</a>{% endif %}
     </p>

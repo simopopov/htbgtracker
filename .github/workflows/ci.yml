@@ -1,6 +1,8 @@
-name: CI
+name: CI/CD
 
-# Deployment is handled by Vercel's git integration; this only gates quality.
+# push to main → tests → production deploy to Vercel (via CLI + VERCEL_TOKEN
+# secret). If you later connect Vercel's native GitHub integration, remove
+# the deploy job so pushes don't deploy twice.
 on:
   push:
     branches: [main]
@@ -16,3 +18,29 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
       - run: pytest -q
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency: production-deploy
+    env:
+      VERCEL_ORG_ID: team_S9aiVaG2STRMMIrJ150xLwb1
+      VERCEL_PROJECT_ID: prj_cT6y2LOCTRf7FGhT096YVgB1Ul37
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Vercel (production)
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::Missing VERCEL_TOKEN secret — create one at vercel.com/account/tokens and add it in repo Settings → Secrets."
+            exit 1
+          fi
+          npm i -g vercel@latest
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+      - name: Health check
+        run: |
+          sleep 5
+          curl -fsS --retry 3 --retry-delay 5 https://htbg-tracker.vercel.app/healthz

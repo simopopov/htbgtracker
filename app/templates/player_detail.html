@@ -24,6 +24,9 @@
           <span class="badge warn">{{ T('u21_expired') }}</span>
         {% else %}
           {{ u21_until|date }} <span class="badge">{{ T('u21_weeks_left', n=u21_weeks) }}</span>
+          {% if u21_last_match %}
+          <div class="small-text u21-last">{{ T('u21_last_match') }}: <strong>{{ u21_label(u21_last_match[1]) }}</strong> · {{ u21_last_match[0] }}</div>
+          {% endif %}
         {% endif %}
         <div class="muted small-text"><a href="https://www.northkilttown.com/u21.php" target="_blank" rel="noopener">{{ T('u21_match_link') }}</a></div>
       {% else %}—{% endif %}

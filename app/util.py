@@ -8,6 +8,24 @@ HT_YEAR_DAYS = 112
 U21_LIMIT_DAYS = 22 * HT_YEAR_DAYS
 
 
+def last_u21_match(until: datetime | None):
+    """The last U21 competition match the player can still play: the latest
+    calendar match strictly before the date he turns 22. Returns
+    (date_str, label) or None (no eligibility, or the calendar has run out)."""
+    from .u21_calendar import U21_MATCHES
+
+    if until is None:
+        return None
+    cutoff = until.strftime("%Y-%m-%d")
+    last = None
+    for date_str, label in U21_MATCHES:
+        if date_str < cutoff:
+            last = (date_str, label)
+        else:
+            break
+    return last
+
+
 def u21_until(age_years, age_days, as_of: datetime | None) -> datetime | None:
     """The date the player turns 22 and loses U21 eligibility.
 

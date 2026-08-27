@@ -15,7 +15,7 @@ from ..services import outreach
 from ..services.capacity import budget_band
 from ..services.matching import declaration_active, rank_trainers
 from ..services.sync import SyncThrottled, sync_tracked_player
-from ..util import parse_date, parse_int, parse_money, u21_until
+from ..util import last_u21_match, parse_date, parse_int, parse_money, u21_until
 
 router = APIRouter()
 
@@ -274,6 +274,7 @@ def player_detail(request: Request, pid: int, db: Session = Depends(get_db)):
         "u21_until": until,
         "u21_weeks": max(0, (until - now).days // 7) if until else None,
         "u21_expired": bool(until and until <= now),
+        "u21_last_match": last_u21_match(until) if until and until > now else None,
         "matches": [],
         "my_interest": None,
         "scout_compose": None,

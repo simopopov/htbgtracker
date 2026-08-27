@@ -230,6 +230,7 @@ STRINGS: dict[str, dict[str, str]] = {
     "u21_weeks_left": {"en": "≈ {n} wk left", "bg": "още ≈ {n} седм."},
     "u21_expired": {"en": "no longer U21-eligible", "bg": "вече не е за U21"},
     "u21_match_link": {"en": "match-by-match view (North Kilttown)", "bg": "мач по мач (North Kilttown)"},
+    "u21_last_match": {"en": "last possible match", "bg": "последен възможен мач"},
     "pd_asking_price": {"en": "Asking price", "bg": "Начална цена"},
     "pd_deadline": {"en": "Deadline", "bg": "Краен срок"},
     "pd_last_sync": {"en": "Last refresh", "bg": "Последно обновяване"},
@@ -489,6 +490,27 @@ STRINGS: dict[str, dict[str, str]] = {
         "bg": "{skill} ~{weeks} седм. ({stamina}% издръжливост)",
     },
 }
+
+
+# U21 calendar labels arrive in English from the transcribed schedule;
+# order matters (longer prefixes first).
+_U21_LABEL_BG = [
+    ("World Cup Medal Round", "СП медален кръг"),
+    ("World Cup Round", "СП кръг"),
+    ("Continental Championship", "Континентално първенство"),
+    ("Nations Cup", "Купа на нациите"),
+    ("Quarters", "четвъртфинали"),
+    ("Semis", "полуфинали"),
+    ("Final", "финал"),
+]
+
+
+def localize_u21_label(locale: str, label: str) -> str:
+    if locale != "bg":
+        return label
+    for en, bg in _U21_LABEL_BG:
+        label = label.replace(en, bg)
+    return label
 
 
 def t(locale: str, key: str, **params) -> str:

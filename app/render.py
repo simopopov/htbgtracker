@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 
 from . import security
 from .config import settings
-from .i18n import LEVEL_NAMES, t
+from .i18n import LEVEL_NAMES, localize_u21_label, t
 
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
@@ -49,6 +49,7 @@ def render(request: Request, name: str, ctx: dict | None = None, status_code: in
         "T": T,
         "TT": TT,
         "level_name": level_name,
+        "u21_label": lambda label: localize_u21_label(locale, label),
         "locale": locale,
         "user": user,
         "settings": settings,

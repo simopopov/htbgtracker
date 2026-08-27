@@ -50,6 +50,26 @@ def test_u21_until():
     assert u21_until(17, 32, None) is None
 
 
+def test_last_u21_match():
+    from datetime import datetime
+
+    from app.util import last_u21_match
+
+    # The user's real example: eligibility ends 2027-09-12 → the last playable
+    # match is World Cup Round 4 #1 on 2027-09-10 (the 09-13 match is too late).
+    date, label = last_u21_match(datetime(2027, 9, 12))
+    assert date == "2027-09-10"
+    assert label == "World Cup Round 4 : #1"
+
+    # Before the first match in the calendar → nothing playable.
+    assert last_u21_match(datetime(2026, 8, 1)) is None
+    # After the calendar's end → the final of the last edition.
+    date, label = last_u21_match(datetime(2030, 1, 1))
+    assert date == "2029-08-10"
+    assert "Final" in label
+    assert last_u21_match(None) is None
+
+
 def test_budget_bands_edges():
     assert budget_band(None) == "band_unknown"
     assert budget_band(0) == "band_0"

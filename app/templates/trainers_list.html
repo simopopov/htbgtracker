@@ -71,14 +71,20 @@
         {% for d in r.active %}
           <div class="decl-line">
             <span class="badge">{{ T('skill_' + d.slot_type) if d.slot_type != 'any' else T('skill_any') }}</span>
-            {% if d.quality_threshold %}<span class="muted small-text">{{ level_name(d.quality_threshold) }}+</span>{% endif %}
-            <span class="muted small-text">{{ T('timing_' + d.timing) }}{% if d.conditional_on_sale %} · {{ T('f_conditional') }}{% endif %}</span>
+            <span class="muted small-text">{{ T('timing_' + d.timing) }}</span>
+            {% if d.max_price %}<span class="muted small-text">· {{ T('f_max_price_short') }} {{ d.max_price|money }}</span>{% endif %}
           </div>
           <div class="muted small-text decl-sub">
             {% if d.training_weeks %}{{ T('decl_weeks_n', n=d.training_weeks) }}{% else %}{{ T('decl_indefinite') }}{% endif %}
             · {{ T('decl_valid_until') }} {{ d.valid_until|date }}
-            {% if d.player_to_move %} · {{ T('decl_selling', name=d.player_to_move) }}{% if d.expected_sale_price %} ({{ d.expected_sale_price|money }}){% endif %}{% endif %}
           </div>
+          {% if d.min_age or d.max_age or d.specialty_id is not none or d.skill_reqs %}
+          <div class="muted small-text decl-sub">
+            {% if d.min_age or d.max_age %}{{ T('decl_age') }} {{ d.min_age or '…' }}–{{ d.max_age or '…' }}{% endif %}
+            {% if d.specialty_id is not none %} · {{ T('spec_id_' + d.specialty_id|string) }}{% endif %}
+            {% if d.skill_reqs %}{% for s, req in d.skill_reqs.items() %} · {{ T('skill_' + s) }}{% if req.min %} ≥ {{ req.min }}{% endif %}{% if req.max %} ≤ {{ req.max }}{% endif %}{% endfor %}{% endif %}
+          </div>
+          {% endif %}
           {% if d.note %}<div class="muted small-text decl-sub">„{{ d.note }}“</div>{% endif %}
         {% endfor %}
       {% else %}

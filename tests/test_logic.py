@@ -19,7 +19,7 @@ def profile(**kw):
 
 def decl(**kw):
     defaults = dict(
-        slot_type="playmaking", timing="immediate", conditional_on_sale=False,
+        slot_type="playmaking", timing="immediate",
         status="active", valid_until=NOW + timedelta(days=10),
     )
     defaults.update(kw)
@@ -102,13 +102,47 @@ def test_rank_horizon_warning():
     assert not any(k == "warn_horizon_short" for k, _ in by_name["endless"].warnings)
 
 
-def test_rank_budget_after_sale():
-    p = player(estimated_price=3_000_000)
+def test_rank_declaration_requirements():
+    p = player(estimated_price=2_000_000)
+    p.age_years = 17
+    p.specialty_id = 1  # technical
+    p.skills = {"playmaking": 7, "stamina": 6}
+
+    fits = (
+        user("fits"),
+        profile(team_name="Fits", expected_cash=5_000_000),
+        [decl(max_price=2_500_000, min_age=16, max_age=18, specialty_id=1,
+              skill_reqs={"playmaking": {"min": 7, "max": None}})],
+    )
+    picky = (
+        user("picky"),
+        profile(team_name="Picky", expected_cash=5_000_000),
+        [decl(max_price=1_500_000, min_age=18,
+              skill_reqs={"playmaking": {"min": 9, "max": None},
+                          "stamina": {"min": None, "max": 5}})],
+    )
+    results = rank_trainers(p, [fits, picky], NOW)
+    by_name = {r.user.login_name: r for r in results}
+
+    fit_keys = [k for k, _ in by_name["fits"].reasons]
+    assert "reason_requirements_ok" in fit_keys
+
+    picky_warn = [k for k, _ in by_name["picky"].warnings]
+    assert "warn_req_age" in picky_warn          # 17 < min 18
+    assert "warn_req_skill_low" in picky_warn    # playmaking 7 < 9
+    assert "warn_req_skill_high" in picky_warn   # stamina 6 > max 5
+    assert "warn_req_price" in picky_warn        # 2M > max 1.5M
+    assert by_name["fits"].score > by_name["picky"].score
+
+
+def test_rank_requirements_unknown_data_is_not_violation():
+    p = player(estimated_price=None)  # nothing known about the player
     bundle = (
         user(),
-        profile(expected_cash=1_500_000),
-        [decl(conditional_on_sale=True, expected_sale_price=2_000_000)],
+        profile(),
+        [decl(max_price=1_000_000, min_age=18, specialty_id=3,
+              skill_reqs={"playmaking": {"min": 9, "max": None}})],
     )
     results = rank_trainers(p, [bundle], NOW)
-    keys = [k for k, _ in results[0].reasons]
-    assert "reason_budget_after_sale" in keys
+    warn_keys = [k for k, _ in results[0].warnings]
+    assert not any(k.startswith("warn_req_") for k in warn_keys)

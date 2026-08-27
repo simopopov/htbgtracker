@@ -52,6 +52,20 @@ _COLUMN_MIGRATIONS = [
     ("interests", "max_bid", "BIGINT"),
     ("tracked_players", "national_team_id", "INTEGER"),
     ("tracked_players", "national_team_name", "VARCHAR(120)"),
+    ("declarations", "max_price", "BIGINT"),
+    ("declarations", "min_age", "INTEGER"),
+    ("declarations", "max_age", "INTEGER"),
+    ("declarations", "specialty_id", "INTEGER"),
+    ("declarations", "skill_reqs", "TEXT"),
+]
+
+# Columns retired by the declaration redesign (requirements instead of
+# player-to-move / conditional-on-sale). Dropped when present.
+_COLUMN_DROPS = [
+    ("declarations", "quality_threshold"),
+    ("declarations", "player_to_move"),
+    ("declarations", "expected_sale_price"),
+    ("declarations", "conditional_on_sale"),
 ]
 
 
@@ -64,6 +78,11 @@ def _migrate_columns():
             existing = {row[1] for row in rows}
             if existing and column not in existing:
                 conn.exec_driver_sql(f"ALTER TABLE {table} ADD COLUMN {column} {ddl_type}")
+        for table, column in _COLUMN_DROPS:
+            rows = conn.exec_driver_sql(f"PRAGMA table_info({table})").fetchall()
+            existing = {row[1] for row in rows}
+            if column in existing:
+                conn.exec_driver_sql(f"ALTER TABLE {table} DROP COLUMN {column}")
 
 
 def init_db():

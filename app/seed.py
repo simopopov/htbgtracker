@@ -90,19 +90,21 @@ def seed_if_empty() -> None:
               {"stamina": 7, "scoring": 5, "defending": 5}, False)
 
         d1 = models.Declaration(
-            profile_id=p1.id, slot_type="playmaking", quality_threshold=7,
-            timing="immediate", note="Room for one more 17yo in the rotation.",
+            profile_id=p1.id, slot_type="playmaking",
+            timing="immediate", max_price=3_000_000,
+            skill_reqs={"playmaking": {"min": 7, "max": None}},
+            note="Room for one more 17yo in the rotation.",
             valid_until=now + timedelta(days=21),
         )
         d2 = models.Declaration(
-            profile_id=p2.id, slot_type="winger", quality_threshold=6,
-            player_to_move="Ivan Petkov (18.96)", expected_sale_price=2_000_000,
-            timing="after_cycle", conditional_on_sale=True,
-            note="Will free the slot once Petkov sells.",
+            profile_id=p2.id, slot_type="winger", training_weeks=30,
+            timing="after_cycle", max_price=1_500_000, max_age=18,
+            skill_reqs={"winger": {"min": 6, "max": None}},
+            note="Slot opens after the current cycle.",
             valid_until=now + timedelta(days=10),
         )
         d3 = models.Declaration(
-            profile_id=p3.id, slot_type="scoring", quality_threshold=6,
+            profile_id=p3.id, slot_type="scoring", max_price=900_000,
             timing="immediate", note="Old declaration, never renewed.",
             valid_until=now - timedelta(days=3),
         )

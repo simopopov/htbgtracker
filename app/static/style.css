@@ -141,6 +141,8 @@ textarea { width: 100%; }
 .skills-grid legend { font-size: 0.8rem; color: var(--muted); padding: 0 0.3rem; }
 .skills-grid label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.78rem; color: var(--muted); }
 .skill-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.req-pair { display: flex; gap: 0.35rem; }
+.req-pair input { width: 100%; min-width: 0; }
 .interest-form { display: flex; gap: 0.4rem; align-items: center; }
 .interest-form input { width: 7.5rem; font-size: 0.85rem; }
 .actions-cell form { margin-bottom: 0.3rem; }

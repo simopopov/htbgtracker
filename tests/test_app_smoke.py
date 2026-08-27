@@ -45,13 +45,14 @@ def test_scout_flow(client):
     assert "FC Vitosha 09" in r5.text
     assert "Cherno More Youth" not in r5.text
     assert "Ludogorets Fan Club" not in r5.text
-    # Timing filter: after_cycle → only the conditional winger slot.
+    # Timing filter: after_cycle → only the winger slot.
     r6 = client.get("/trainers", params={"slot_timing": "after_cycle"})
     assert "Cherno More Youth" in r6.text
     assert "FC Vitosha 09" not in r6.text
-    # The declaration details are visible in the slots column.
-    assert "Ivan Petkov" in r6.text  # player being sold
-    assert "2 000 000" in r6.text  # expected sale price
+    # The declaration requirements are visible in the slots column.
+    assert "1 500 000" in r6.text  # trainer's max price
+    assert "Winger ≥ 6" in r6.text  # skill requirement
+    assert "…–18" in r6.text  # max age requirement
 
     # Add a new player -> public data auto-fills from the mock fixture.
     r = client.post("/players/new", data={
@@ -104,20 +105,26 @@ def test_trainer_flow(client):
     }, follow_redirects=True)
     assert r.status_code == 200
 
-    # Declaration lifecycle: create with a training horizon, then withdraw.
+    # Declaration lifecycle: create with horizon, max price and requirements.
     r = client.post("/declarations", data={
         "slot_type": "winger",
-        "quality_threshold": "6",
         "training_weeks": "50",
-        "player_to_move": "",
-        "expected_sale_price": "",
         "timing": "immediate",
+        "max_price": "2 200 000",
+        "min_age": "16",
+        "max_age": "19",
+        "specialty": "2",
+        "req_min_winger": "6",
+        "req_max_stamina": "9",
         "note": "second slot",
         "valid_days": "28",
     }, follow_redirects=True)
     assert r.status_code == 200
     assert "second slot" in r.text
-    assert "50" in r.text and "indefinitely" in r.text  # new decl + old one
+    assert "2 200 000" in r.text          # max price shown
+    assert "16–19" in r.text              # age requirement
+    assert "Winger ≥ 6" in r.text         # skill requirement
+    assert "Stamina ≤ 9" in r.text
 
 
 def test_training_plan_and_skills(client):

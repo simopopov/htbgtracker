@@ -54,17 +54,26 @@
     <h2>{{ T('me_declarations_title') }}</h2>
     {% if declarations %}
     <table>
-      <tr><th>{{ T('f_slot_type') }}</th><th>{{ T('f_quality_threshold') }}</th><th>{{ T('f_timing') }}</th><th>{{ T('f_player_to_move') }}</th><th>{{ T('decl_valid_until') }}</th><th>{{ T('status') }}</th><th>{{ T('actions') }}</th></tr>
+      <tr><th>{{ T('f_slot_type') }}</th><th>{{ T('decl_requirements') }}</th><th>{{ T('f_timing') }}</th><th>{{ T('f_max_price') }}</th><th>{{ T('decl_valid_until') }}</th><th>{{ T('status') }}</th><th>{{ T('actions') }}</th></tr>
       {% for d in declarations %}
       <tr>
         <td>{{ T('skill_' + d.slot_type) if d.slot_type != 'any' else T('skill_any') }}
           {% if d.note %}<div class="muted small-text">{{ d.note }}</div>{% endif %}
         </td>
-        <td>{% if d.quality_threshold %}{{ level_name(d.quality_threshold) }}{% else %}—{% endif %}</td>
-        <td>{{ T('timing_' + d.timing) }}{% if d.conditional_on_sale %} · {{ T('f_conditional') }}{% endif %}
+        <td>
+          {% if d.min_age or d.max_age %}<div class="small-text">{{ T('decl_age') }}: {{ d.min_age or '…' }}–{{ d.max_age or '…' }}</div>{% endif %}
+          {% if d.specialty_id is not none %}<div class="small-text">{{ T('pd_specialty') }}: {{ T('spec_id_' + d.specialty_id|string) }}</div>{% endif %}
+          {% if d.skill_reqs %}
+            {% for s, req in d.skill_reqs.items() %}
+            <div class="small-text">{{ T('skill_' + s) }}{% if req.min %} ≥ {{ req.min }}{% endif %}{% if req.max %} ≤ {{ req.max }}{% endif %}</div>
+            {% endfor %}
+          {% endif %}
+          {% if not (d.min_age or d.max_age or d.specialty_id is not none or d.skill_reqs) %}<span class="muted">—</span>{% endif %}
+        </td>
+        <td>{{ T('timing_' + d.timing) }}
           <div class="muted small-text">{% if d.training_weeks %}{{ T('decl_weeks_n', n=d.training_weeks) }}{% else %}{{ T('decl_indefinite') }}{% endif %}</div>
         </td>
-        <td>{{ d.player_to_move or '—' }}{% if d.expected_sale_price %} ({{ d.expected_sale_price|money }}){% endif %}</td>
+        <td>{% if d.max_price %}{{ d.max_price|money }}{% else %}—{% endif %}</td>
         <td>{{ d.valid_until|date }}</td>
         <td>
           {% if d.status == 'withdrawn' %}<span class="badge gray">{{ T('decl_withdrawn') }}</span>
@@ -94,9 +103,6 @@
           {% for s in training_skills %}<option value="{{ s }}">{{ T('skill_' + s) }}</option>{% endfor %}
         </select>
       </label>
-      <label>{{ T('f_quality_threshold') }}
-        <input type="number" name="quality_threshold" min="1" max="20">
-      </label>
       <label>{{ T('f_training_weeks') }}
         <input type="number" name="training_weeks" min="1" max="500" placeholder="{{ T('decl_indefinite') }}">
       </label>
@@ -105,16 +111,35 @@
           {% for t_ in timings %}<option value="{{ t_ }}">{{ T('timing_' + t_) }}</option>{% endfor %}
         </select>
       </label>
-      <label>{{ T('f_player_to_move') }}
-        <input type="text" name="player_to_move">
+      <label>{{ T('f_max_price') }}
+        <input type="text" name="max_price" placeholder="2500000">
       </label>
-      <label>{{ T('f_expected_sale_price') }}
-        <input type="text" name="expected_sale_price">
+      <label>{{ T('f_min_age') }}
+        <input type="number" name="min_age" min="15" max="45">
+      </label>
+      <label>{{ T('f_max_age') }}
+        <input type="number" name="max_age" min="15" max="45">
+      </label>
+      <label>{{ T('f_req_specialty') }}
+        <select name="specialty">
+          <option value="">{{ T('spec_any') }}</option>
+          {% for sid in specialty_ids %}{% if sid != 0 %}<option value="{{ sid }}">{{ T('spec_id_' + sid|string) }}</option>{% endif %}{% endfor %}
+        </select>
       </label>
       <label>{{ T('f_valid_days') }}
         <input type="number" name="valid_days" value="{{ default_days }}" min="1" max="112">
       </label>
-      <label class="check"><input type="checkbox" name="conditional_on_sale" value="1"> {{ T('f_conditional') }}</label>
+      <fieldset class="wide skills-grid">
+        <legend>{{ T('req_skills_legend') }}</legend>
+        {% for s in player_skills %}
+        <label>{{ T('skill_' + s) }}
+          <span class="req-pair">
+            <input type="number" name="req_min_{{ s }}" min="1" max="20" placeholder="{{ T('req_min_ph') }}">
+            <input type="number" name="req_max_{{ s }}" min="1" max="20" placeholder="{{ T('req_max_ph') }}">
+          </span>
+        </label>
+        {% endfor %}
+      </fieldset>
       <label class="wide">{{ T('f_note') }}
         <textarea name="note" rows="2"></textarea>
       </label>

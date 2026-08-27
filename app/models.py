@@ -119,14 +119,19 @@ class Declaration(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     profile_id: Mapped[int] = mapped_column(ForeignKey("trainer_profiles.id"), index=True)
     slot_type: Mapped[str] = mapped_column(String(30))  # a TRAINING_SKILLS entry or "any"
-    quality_threshold: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # denomination 1–20
     # How many more weeks the trainer commits to this training type;
     # NULL = indefinitely ("ще съм на разиграване безсрочно").
     training_weeks: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    player_to_move: Mapped[str] = mapped_column(String(200), default="")
-    expected_sale_price: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     timing: Mapped[str] = mapped_column(String(20), default="immediate")
-    conditional_on_sale: Mapped[bool] = mapped_column(Boolean, default=False)
+    # The most the trainer can pay for the incoming player.
+    max_price: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
+    # Optional requirements for the incoming player; NULL = no requirement.
+    min_age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    max_age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    specialty_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # {skill: {"min": 1–20 | None, "max": 1–20 | None}} — only skills with a
+    # requirement are present.
+    skill_reqs: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     note: Mapped[str] = mapped_column(Text, default="")
     valid_until: Mapped[datetime] = mapped_column(DateTime)
     status: Mapped[str] = mapped_column(String(20), default="active")  # active | withdrawn

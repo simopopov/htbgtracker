@@ -47,6 +47,8 @@ def me(request: Request, db: Session = Depends(get_db)):
         "declarations": declarations,
         "declaration_active": {d.id: declaration_active(d, now) for d in declarations},
         "training_skills": models.TRAINING_SKILLS,
+        "player_skills": models.PLAYER_SKILLS,
+        "specialty_ids": models.SPECIALTY_IDS,
         "timings": models.DECLARATION_TIMINGS,
         "default_days": models.DEFAULT_DECLARATION_DAYS,
     })
@@ -154,20 +156,12 @@ def toggle_trained(request: Request, sp_id: int, db: Session = Depends(get_db)):
 
 # --- Declarations ------------------------------------------------------------
 
+def _clamp(value, low, high):
+    return None if value is None else max(low, min(value, high))
+
+
 @router.post("/declarations")
-def declaration_create(
-    request: Request,
-    slot_type: str = Form(...),
-    quality_threshold: str = Form(""),
-    training_weeks: str = Form(""),
-    player_to_move: str = Form(""),
-    expected_sale_price: str = Form(""),
-    timing: str = Form("immediate"),
-    conditional_on_sale: str = Form(""),
-    note: str = Form(""),
-    valid_days: str = Form(""),
-    db: Session = Depends(get_db),
-):
+async def declaration_create(request: Request, db: Session = Depends(get_db)):
     user, resp = _guard(request, db)
     if resp:
         return resp
@@ -175,25 +169,36 @@ def declaration_create(
     if profile is None:
         security.flash(request, "fl_need_profile")
         return RedirectResponse("/me", status_code=303)
-    days = parse_int(valid_days) or models.DEFAULT_DECLARATION_DAYS
-    days = max(1, min(days, 112))
-    threshold = parse_int(quality_threshold)
-    if threshold is not None:
-        threshold = max(1, min(threshold, 20))
-    weeks = parse_int(training_weeks)
-    if weeks is not None:
-        weeks = max(1, min(weeks, 500))
+
+    form = await request.form()
+    slot_type = form.get("slot_type", "any")
+    timing = form.get("timing", "immediate")
+    days = parse_int(form.get("valid_days")) or models.DEFAULT_DECLARATION_DAYS
+
+    # Optional per-skill requirements: req_min_<skill> / req_max_<skill>.
+    skill_reqs = {}
+    for skill in models.PLAYER_SKILLS:
+        lo = _clamp(parse_int(form.get(f"req_min_{skill}")), 1, 20)
+        hi = _clamp(parse_int(form.get(f"req_max_{skill}")), 1, 20)
+        if lo is not None or hi is not None:
+            skill_reqs[skill] = {"min": lo, "max": hi}
+
+    specialty = parse_int(form.get("specialty"))
+    if specialty not in models.SPECIALTY_IDS:
+        specialty = None
+
     db.add(models.Declaration(
         profile_id=profile.id,
         slot_type=slot_type if slot_type in models.TRAINING_SKILLS + ["any"] else "any",
-        quality_threshold=threshold,
-        training_weeks=weeks,
-        player_to_move=player_to_move.strip(),
-        expected_sale_price=parse_money(expected_sale_price),
+        training_weeks=_clamp(parse_int(form.get("training_weeks")), 1, 500),
         timing=timing if timing in models.DECLARATION_TIMINGS else "immediate",
-        conditional_on_sale=bool(conditional_on_sale),
-        note=note.strip(),
-        valid_until=datetime.utcnow() + timedelta(days=days),
+        max_price=parse_money(form.get("max_price")),
+        min_age=_clamp(parse_int(form.get("min_age")), 15, 45),
+        max_age=_clamp(parse_int(form.get("max_age")), 15, 45),
+        specialty_id=specialty,
+        skill_reqs=skill_reqs or None,
+        note=(form.get("note") or "").strip(),
+        valid_until=datetime.utcnow() + timedelta(days=max(1, min(days, 112))),
     ))
     db.commit()
     security.flash(request, "fl_decl_created")

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from .. import models, security
 from ..chpp.errors import CHPPError
+from ..i18n import t
 from ..db import get_db
 from ..render import render
 from ..services import outreach
@@ -296,9 +297,22 @@ def player_detail(request: Request, pid: int, db: Session = Depends(get_db)):
         if c.parent_id is None
     ]
 
+    def _localize_params(pairs):
+        out = []
+        for key, params in pairs:
+            if "skill" in params:
+                params = {**params, "skill": t(locale, f"skill_{params['skill']}")}
+            if key == "warn_req_price" and "limit" in params:
+                params = {**params, "limit": f"{params['limit']:,}".replace(",", " ")}
+            out.append((key, params))
+        return out
+
     if security.is_scout(user):
         bundles = [(p.user, p, p.declarations) for p in _profiles(db)]
         matches = rank_trainers(player, bundles, now)[:6]
+        for m in matches:
+            m.reasons = _localize_params(m.reasons)
+            m.warnings = _localize_params(m.warnings)
         ctx["matches"] = [
             {
                 "m": m,

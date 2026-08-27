@@ -22,6 +22,41 @@ def renew(decl: models.Declaration, now: datetime, days: int = models.DEFAULT_DE
     decl.status = "active"
 
 
+def _has_requirements(decl: models.Declaration) -> bool:
+    return bool(
+        decl.min_age or decl.max_age or decl.specialty_id is not None
+        or decl.skill_reqs or decl.max_price
+    )
+
+
+def _requirement_violations(decl: models.Declaration, player: models.TrackedPlayer):
+    """Which of the declaration's requirements does the player (as far as we
+    know him) break? Unknown player data never counts as a violation."""
+    violations = []
+    if player.age_years is not None:
+        if decl.min_age and player.age_years < decl.min_age:
+            violations.append(("warn_req_age", {"limit": decl.min_age}))
+        if decl.max_age and player.age_years > decl.max_age:
+            violations.append(("warn_req_age_max", {"limit": decl.max_age}))
+    if (
+        decl.specialty_id is not None
+        and player.specialty_id is not None
+        and decl.specialty_id != player.specialty_id
+    ):
+        violations.append(("warn_req_spec", {}))
+    for skill, req in (decl.skill_reqs or {}).items():
+        have = (player.skills or {}).get(skill)
+        if have is None:
+            continue
+        if req.get("min") and have < req["min"]:
+            violations.append(("warn_req_skill_low", {"skill": skill, "limit": req["min"]}))
+        if req.get("max") and have > req["max"]:
+            violations.append(("warn_req_skill_high", {"skill": skill, "limit": req["max"]}))
+    if decl.max_price and player.estimated_price and player.estimated_price > decl.max_price:
+        violations.append(("warn_req_price", {"limit": decl.max_price}))
+    return violations
+
+
 @dataclass
 class MatchResult:
     user: models.User
@@ -54,11 +89,9 @@ def rank_trainers(player: models.TrackedPlayer, bundles, now: datetime) -> list[
         if active:
             r.score += 25
             r.reasons.append(("reason_slot_declared", {"n": len(active)}))
-            if any(d.timing == "immediate" and not d.conditional_on_sale for d in active):
+            if any(d.timing == "immediate" for d in active):
                 r.score += 10
                 r.reasons.append(("reason_slot_immediate", {}))
-            elif any(d.conditional_on_sale for d in active):
-                r.warnings.append(("warn_conditional", {}))
             # Does the trainer's declared training horizon cover the plan?
             plan_weeks = sum(
                 s.weeks for s in getattr(player, "plan_steps", []) if s.weeks
@@ -69,6 +102,19 @@ def rank_trainers(player: models.TrackedPlayer, bundles, now: datetime) -> list[
                     "warn_horizon_short",
                     {"declared": max(horizons), "needed": plan_weeks},
                 ))
+            # Declared requirements vs what we know about the player: judge
+            # against the friendliest declaration (fewest violations).
+            best = min(
+                (( _requirement_violations(d, player), d) for d in active),
+                key=lambda pair: len(pair[0]),
+            )
+            violations, best_decl = best
+            if violations:
+                r.warnings.extend(violations)
+                r.score -= 6 * len(violations)
+            elif _has_requirements(best_decl):
+                r.score += 8
+                r.reasons.append(("reason_requirements_ok", {}))
         else:
             r.warnings.append(("warn_no_slot", {}))
 
@@ -79,12 +125,6 @@ def rank_trainers(player: models.TrackedPlayer, bundles, now: datetime) -> list[
             elif cash >= player.estimated_price:
                 r.score += 20
                 r.reasons.append(("reason_budget_ok", {}))
-            elif any(
-                d.expected_sale_price and cash + d.expected_sale_price >= player.estimated_price
-                for d in active
-            ):
-                r.score += 8
-                r.reasons.append(("reason_budget_after_sale", {}))
             else:
                 r.score -= 15
                 r.warnings.append(("warn_budget_short", {}))

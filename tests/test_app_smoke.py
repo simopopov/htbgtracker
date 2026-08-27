@@ -302,6 +302,30 @@ def test_row_actions_quickstatus_and_delete(client):
     assert "Stefan Bozhkov" not in r.text
 
 
+def test_multi_team_choice(client):
+    # SashoScout manages two teams (mock fixture) and has no profile yet:
+    # connecting must ask which team, never guess.
+    login(client, 104)
+    r = client.post("/me/sync", follow_redirects=True)
+    assert "Sasho United" in r.text and "Sasho Ladies" in r.text
+    assert "Choose" in r.text  # landed on the team chooser
+
+    # Pick the NON-primary team — proves the choice is honoured.
+    r = client.post("/me/team", data={"team_id": "1042"}, follow_redirects=True)
+    assert "Sasho Ladies" in r.text
+    assert "Defending" in r.text  # training type of team 1042
+    assert "2 400 000" in r.text  # its expected cash
+
+    # A team that is not theirs is rejected.
+    r = client.post("/me/team", data={"team_id": "9999"}, follow_redirects=True)
+    assert "does not belong" in r.text
+
+    # The chooser marks the connected team and offers the other one.
+    r = client.get("/me/teams")
+    assert "Connected" in r.text
+    assert "Sasho United" in r.text
+
+
 def test_declaration_renew_and_market_visibility(client):
     login(client, 203)  # TishoTrainer has an expired declaration
     r = client.get("/me")

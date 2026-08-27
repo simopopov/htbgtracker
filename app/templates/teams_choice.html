@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ T('teams_title') }}</h1>
+<p class="muted">{{ T('teams_hint') }}</p>
+
+<div class="cards">
+  {% for t_ in teams %}
+  <form method="post" action="/me/team" class="card persona team-card">
+    <input type="hidden" name="team_id" value="{{ t_.team_id }}">
+    <div class="card-title">{{ t_.team_name }}</div>
+    <div class="muted small-text">{{ t_.league_name }}</div>
+    {% if t_.team_id == current_team_id %}
+      <span class="badge ok-badge">{{ T('teams_current') }}</span>
+    {% else %}
+      <button class="btn primary" type="submit">{{ T('teams_pick') }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+{% if current_team_id %}
+<p class="muted small-text">{{ T('teams_switch_warning') }}</p>
+{% endif %}
+<a class="btn" href="/me">{{ T('cancel') }}</a>
+{% endblock %}

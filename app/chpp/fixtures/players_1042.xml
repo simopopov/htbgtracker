@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>players.xml</FileName>
+  <Version>2.8</Version>
+  <UserID>104</UserID>
+  <FetchedDate>2026-08-27 08:00:00</FetchedDate>
+  <Team>
+    <TeamID>1042</TeamID>
+    <TeamName>Sasho Ladies</TeamName>
+    <PlayerList>
+      <Player>
+        <PlayerID>60421</PlayerID>
+        <FirstName>Elena</FirstName>
+        <LastName>Koleva</LastName>
+        <Age>19</Age>
+        <AgeDays>40</AgeDays>
+        <TSI>9200</TSI>
+        <Salary>3900</Salary>
+        <Specialty>2</Specialty>
+        <StaminaSkill>6</StaminaSkill>
+        <DefenderSkill>6</DefenderSkill>
+        <PlaymakerSkill>4</PlaymakerSkill>
+      </Player>
+      <Player>
+        <PlayerID>60422</PlayerID>
+        <FirstName>Mira</FirstName>
+        <LastName>Stancheva</LastName>
+        <Age>22</Age>
+        <AgeDays>15</AgeDays>
+        <TSI>6100</TSI>
+        <Salary>3300</Salary>
+        <Specialty>0</Specialty>
+        <StaminaSkill>7</StaminaSkill>
+        <DefenderSkill>5</DefenderSkill>
+        <PlaymakerSkill>3</PlaymakerSkill>
+      </Player>
+    </PlayerList>
+  </Team>
+</HattrickData>

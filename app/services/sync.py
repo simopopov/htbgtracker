@@ -28,6 +28,14 @@ class SyncThrottled(Exception):
     pass
 
 
+class TeamChoiceRequired(Exception):
+    """The user manages several teams and has not chosen one yet."""
+
+    def __init__(self, teams: list[dict]):
+        self.teams = teams
+        super().__init__("team choice required")
+
+
 def _can_refresh(db: Session, obj_type: str, obj_id: int, now: datetime) -> bool:
     cutoff = now - timedelta(hours=REFRESH_MIN_HOURS)
     recent = (
@@ -111,10 +119,23 @@ def coach_level_from_squad(squad: list[dict]):
     return None
 
 
-def sync_trainer(db: Session, user: models.User, force: bool = False) -> models.TrainerProfile:
+def fetch_user_teams(db: Session, user: models.User) -> list[dict]:
+    """All (non-bot) senior teams the user manages — for the team chooser."""
+    chpp = _client_for(db, user)
+    td = parse_teamdetails(chpp.fetch("teamdetails", "3.9", userID=user.ht_user_id))
+    return [t for t in td["teams"] if not t["is_bot"]] or td["teams"]
+
+
+def sync_trainer(
+    db: Session,
+    user: models.User,
+    force: bool = False,
+    team_id: int | None = None,
+) -> models.TrainerProfile:
     """Refresh the fact side of a trainer's registry entry from CHPP.
 
-    Never touches declarations — those are intentions, not facts.
+    Never touches declarations — those are intentions, not facts. A user with
+    several teams must pick one (TeamChoiceRequired) — never guess for them.
     """
     now = datetime.utcnow()
     if not force and not _can_refresh(db, "trainer", user.ht_user_id, now):
@@ -126,7 +147,21 @@ def sync_trainer(db: Session, user: models.User, force: bool = False) -> models.
     teams = [t for t in td["teams"] if not t["is_bot"]] or td["teams"]
     if not teams:
         raise CHPPError(-1, "user has no teams")
-    primary = next((t for t in teams if t.get("is_primary")), teams[0])
+
+    if team_id is not None:
+        primary = next((t for t in teams if t["team_id"] == team_id), None)
+        if primary is None:
+            raise CHPPError(-1, "team does not belong to this user")
+    elif user.trainer_profile is not None:
+        primary = next(
+            (t for t in teams if t["team_id"] == user.trainer_profile.team_id), None
+        )
+        if primary is None:
+            raise CHPPError(-1, "the connected team no longer belongs to this user")
+    elif len(teams) > 1:
+        raise TeamChoiceRequired(teams)
+    else:
+        primary = teams[0]
     team_id = primary["team_id"]
 
     tr = parse_training(chpp.fetch("training", "2.2", teamId=team_id))

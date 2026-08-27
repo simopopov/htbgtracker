@@ -103,6 +103,7 @@ def parse_teamdetails(xml: str) -> dict:
             "is_primary": _b(tm, "IsPrimaryClub", True),
             "is_bot": _b(tm, "BotStatus/IsBot"),
             "league_id": _i(tm, "League/LeagueID"),
+            "league_name": _t(tm, "League/LeagueName", ""),
         })
     return {"user": user, "teams": teams, "nt_staff": nt_staff}
 

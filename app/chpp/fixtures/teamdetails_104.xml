@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HattrickData>
+  <FileName>teamdetails.xml</FileName>
+  <Version>3.9</Version>
+  <UserID>104</UserID>
+  <FetchedDate>2026-08-27 08:00:00</FetchedDate>
+  <User>
+    <UserID>104</UserID>
+    <Loginname>SashoScout</Loginname>
+    <SupporterTier>platinum</SupporterTier>
+    <LastLoginDate>2026-08-26 22:10:00</LastLoginDate>
+  </User>
+  <Teams>
+    <Team>
+      <TeamID>1041</TeamID>
+      <TeamName>Sasho United</TeamName>
+      <IsPrimaryClub>True</IsPrimaryClub>
+      <League>
+        <LeagueID>50</LeagueID>
+        <LeagueName>Bulgaria</LeagueName>
+      </League>
+      <BotStatus>
+        <IsBot>False</IsBot>
+      </BotStatus>
+    </Team>
+    <Team>
+      <TeamID>1042</TeamID>
+      <TeamName>Sasho Ladies</TeamName>
+      <IsPrimaryClub>False</IsPrimaryClub>
+      <League>
+        <LeagueID>50</LeagueID>
+        <LeagueName>Bulgaria</LeagueName>
+      </League>
+      <BotStatus>
+        <IsBot>False</IsBot>
+      </BotStatus>
+    </Team>
+  </Teams>
+</HattrickData>

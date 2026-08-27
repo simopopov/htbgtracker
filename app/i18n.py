@@ -336,6 +336,19 @@ STRINGS: dict[str, dict[str, str]] = {
         "bg": "Прекратява достъпа и изтрива синхронизираните данни за отбора, състава и декларациите от регистъра.",
     },
     "me_revoke_btn": {"en": "Disconnect & purge my data", "bg": "Прекрати и изтрий данните ми"},
+    "me_change_team": {"en": "Change team", "bg": "Смени отбора"},
+    "teams_title": {"en": "Choose a team", "bg": "Избери отбор"},
+    "teams_hint": {
+        "en": "You manage more than one team — pick which one to connect to the registry. Its training, squad and budget will be what scouts see.",
+        "bg": "Управляваш повече от един отбор — избери кой да свържеш към регистъра. Неговата тренировка, състав и бюджет ще виждат скаутите.",
+    },
+    "teams_current": {"en": "Connected", "bg": "Свързан"},
+    "teams_pick": {"en": "Connect this team", "bg": "Свържи този отбор"},
+    "teams_switch_warning": {
+        "en": "Switching teams removes the current team's declarations, interests and squad snapshot from the registry — they belong to that team.",
+        "bg": "Смяната на отбора премахва декларациите, заявките и състава на текущия отбор от регистъра — те принадлежат на него.",
+    },
+    "fl_choose_team": {"en": "Choose which team to connect.", "bg": "Изберете кой отбор да свържете."},
 
     # --- market pipeline ---
     "market_title": {"en": "Market pipeline", "bg": "Пазарен поток"},

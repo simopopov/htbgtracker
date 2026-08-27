@@ -12,7 +12,12 @@ from ..db import get_db
 from ..render import render
 from ..services import outreach
 from ..services.matching import declaration_active, renew
-from ..services.sync import SyncThrottled, sync_trainer
+from ..services.sync import (
+    SyncThrottled,
+    TeamChoiceRequired,
+    fetch_user_teams,
+    sync_trainer,
+)
 from ..util import parse_int, parse_money
 
 router = APIRouter()
@@ -57,10 +62,61 @@ def me_sync(request: Request, db: Session = Depends(get_db)):
         # like Portal's manual refresh. Automated flows keep the 24h throttle.
         sync_trainer(db, user, force=True)
         security.flash(request, "fl_synced")
+    except TeamChoiceRequired:
+        security.flash(request, "fl_choose_team")
+        return RedirectResponse("/me/teams", status_code=303)
     except SyncThrottled:
         security.flash(request, "fl_throttled")
     except CHPPError as e:
         security.flash(request, "fl_sync_failed", err=str(e.message or e.code))
+    return RedirectResponse("/me", status_code=303)
+
+
+def _purge_profile(db: Session, profile: models.TrainerProfile) -> None:
+    """Remove a connected team: null claim references, drop the profile
+    (cascades squad, declarations and interests — they belong to that team)."""
+    for claim in db.query(models.Claim).filter(models.Claim.trainer_profile_id == profile.id).all():
+        claim.trainer_profile_id = None
+    user = profile.user
+    user.trainer_profile = None
+    db.delete(profile)
+    db.flush()
+
+
+@router.get("/me/teams")
+def my_teams(request: Request, db: Session = Depends(get_db)):
+    user, resp = _guard(request, db)
+    if resp:
+        return resp
+    try:
+        teams = fetch_user_teams(db, user)
+    except CHPPError as e:
+        security.flash(request, "fl_sync_failed", err=str(e.message or e.code))
+        return RedirectResponse("/me", status_code=303)
+    current = user.trainer_profile.team_id if user.trainer_profile else None
+    return render(request, "teams_choice.html", {
+        "teams": teams,
+        "current_team_id": current,
+    })
+
+
+@router.post("/me/team")
+def choose_team(request: Request, team_id: int = Form(...), db: Session = Depends(get_db)):
+    user, resp = _guard(request, db)
+    if resp:
+        return resp
+    profile = user.trainer_profile
+    if profile is not None and profile.team_id == team_id:
+        return RedirectResponse("/me", status_code=303)
+    if profile is not None:
+        _purge_profile(db, profile)
+    try:
+        sync_trainer(db, user, force=True, team_id=team_id)
+        security.flash(request, "fl_synced")
+    except CHPPError as e:
+        db.rollback()
+        security.flash(request, "fl_sync_failed", err=str(e.message or e.code))
+        return RedirectResponse("/me/teams", status_code=303)
     return RedirectResponse("/me", status_code=303)
 
 

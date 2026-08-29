@@ -43,7 +43,8 @@ a:hover { text-decoration: underline; }
 /* --- top bar --- */
 .topbar { background: var(--card); border-bottom: 1px solid var(--line); }
 .topbar-inner { max-width: 1180px; margin: 0 auto; padding: 0.7rem 1.2rem; display: flex; align-items: center; gap: 1.4rem; flex-wrap: wrap; }
-.brand { font-family: var(--display); font-weight: 700; font-size: 1.1rem; letter-spacing: -0.01em; color: var(--ink) !important; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 1.1rem; letter-spacing: -0.01em; color: var(--ink) !important; display: inline-flex; align-items: center; gap: 0.55rem; }
+.brand-logo { width: 30px; height: 30px; object-fit: contain; }
 .topbar nav { display: flex; gap: 0.25rem; flex-wrap: wrap; }
 .topbar nav a { color: var(--muted); padding: 0.42rem 0.85rem; border-radius: 999px; font-size: 0.9rem; }
 .topbar nav a:hover { color: var(--ink); background: var(--accent-soft); text-decoration: none; }
@@ -174,6 +175,7 @@ footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 1.
 /* --- login / landing --- */
 .login-wrap { display: grid; grid-template-columns: 1.25fr 1fr; gap: 3.5rem; align-items: center; min-height: 62vh; max-width: 1060px; margin: 0 auto; padding: 2rem 0; }
 @media (max-width: 880px) { .login-wrap { grid-template-columns: 1fr; gap: 2rem; min-height: 0; } }
+.login-logo { width: 110px; height: 110px; object-fit: contain; margin-bottom: 1.1rem; filter: drop-shadow(0 6px 16px rgba(30, 50, 120, 0.15)); }
 .eyebrow { font-family: var(--display); font-size: 0.74rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent-strong); margin-bottom: 0.9rem; }
 .login-headline { font-size: 2.6rem; line-height: 1.12; margin: 0 0 1.8rem; letter-spacing: -0.025em; }
 .feat-list { display: flex; flex-direction: column; gap: 1.05rem; }

@@ -344,6 +344,25 @@ def test_multi_team_choice(client):
     assert 'name="max_bid"' in r.text
 
 
+def test_cron_sync_batches_and_throttles(client):
+    # In mock mode with no CRON_SECRET the endpoint is open (dev only).
+    r = client.get("/cron/sync")
+    assert r.status_code == 200
+    data = r.json()
+    # 202/203 were never synced during the suite → refreshed now; teams
+    # synced earlier in the run are inside the 24h window → skipped.
+    assert data["trainers_ok"] >= 1
+    assert data["trainers_skipped"] >= 1
+    assert data["players_ok"] >= 1
+
+    # A second run finds everything freshly synced.
+    r2 = client.get("/cron/sync")
+    d2 = r2.json()
+    assert d2["trainers_ok"] == 0
+    assert d2["players_ok"] == 0
+    assert d2["trainers_skipped"] >= 2
+
+
 def test_declaration_renew_and_market_visibility(client):
     login(client, 203)  # TishoTrainer has an expired declaration
     r = client.get("/me")

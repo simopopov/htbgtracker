@@ -10,7 +10,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from . import models
 from .config import settings
 from .db import get_db, init_db
-from .routers import admin, auth, dashboard, scout, trainer
+from .routers import admin, auth, cron, dashboard, scout, trainer
 from .seed import seed_if_empty
 
 
@@ -31,6 +31,7 @@ app.include_router(dashboard.router)
 app.include_router(scout.router)
 app.include_router(trainer.router)
 app.include_router(admin.router)
+app.include_router(cron.router)
 
 
 @app.get("/healthz")

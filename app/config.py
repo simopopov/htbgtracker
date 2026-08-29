@@ -19,6 +19,9 @@ class Settings:
     chpp_consumer_key: str = os.environ.get("CHPP_CONSUMER_KEY", "")
     chpp_consumer_secret: str = os.environ.get("CHPP_CONSUMER_SECRET", "")
     base_url: str = os.environ.get("BASE_URL", "http://localhost:8000")
+    # Shared secret for the scheduled-sync endpoint; Vercel Cron sends it
+    # automatically as "Authorization: Bearer <CRON_SECRET>".
+    cron_secret: str = os.environ.get("CRON_SECRET", "")
     app_name: str = "HT Scout Bridge"
     app_version: str = "0.1.0"
 

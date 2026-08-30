@@ -208,8 +208,17 @@ def sync_trainer(
     profile.expected_cash = _to_local(ec["expected_cash"], currency)
     profile.last_sync = now
 
-    # Replace the squad snapshot, preserving owner-marked training flags.
-    trained_flags = {p.ht_player_id: p.in_trained_position for p in profile.squad}
+    # Replace the squad snapshot. Trained-slot flags come from the durable
+    # per-user marks table (survives team switches and reconnects); flags on
+    # old squad rows are backfilled into it once.
+    marks = {
+        m.ht_player_id
+        for m in db.query(models.TrainedMark).filter(models.TrainedMark.user_id == user.id)
+    }
+    for old in profile.squad:
+        if old.in_trained_position and old.ht_player_id not in marks:
+            db.add(models.TrainedMark(user_id=user.id, ht_player_id=old.ht_player_id))
+            marks.add(old.ht_player_id)
     profile.squad.clear()
     for p in squad:
         profile.squad.append(
@@ -222,7 +231,7 @@ def sync_trainer(
                 tsi=p["tsi"],
                 salary=_to_local(p["salary"], currency),
                 skills=p["skills"],
-                in_trained_position=trained_flags.get(p["ht_player_id"], False),
+                in_trained_position=p["ht_player_id"] in marks,
             )
         )
 

@@ -3,7 +3,18 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import JSON, BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    JSON,
+    BigInteger,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -273,6 +284,20 @@ class Interest(Base):
 
     player: Mapped[TrackedPlayer] = relationship(back_populates="interests")
     profile: Mapped[TrainerProfile] = relationship(back_populates="interests")
+
+
+class TrainedMark(Base):
+    """The user's memory of which of their players sit in trained slots.
+
+    Kept separately from the squad snapshot so the marks survive team
+    switches, disconnects and re-syncs (squad rows are disposable)."""
+
+    __tablename__ = "trained_marks"
+    __table_args__ = (UniqueConstraint("user_id", "ht_player_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    ht_player_id: Mapped[int] = mapped_column(Integer)
 
 
 class CurrencyInfo(Base):

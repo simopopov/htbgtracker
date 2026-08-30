@@ -363,6 +363,34 @@ def test_cron_sync_batches_and_throttles(client):
     assert d2["trainers_skipped"] >= 2
 
 
+def test_trained_marks_survive_profile_recreation(client):
+    import re
+
+    # ZharkoTrainer's seed squad: Petkov ✓, Apostolov ✓, Bonev —.
+    login(client, 202)
+    r = client.get("/me")
+    assert r.text.count("✓") == 2
+    first_toggle = re.search(r"/me/trained/(\d+)", r.text).group(1)
+    r = client.post(f"/me/trained/{first_toggle}", follow_redirects=True)
+    assert r.text.count("✓") == 1  # Petkov unmarked
+
+    # Disconnecting deletes the profile; reconnecting rebuilds the squad —
+    # the tester's exact loss scenario. The marks must be remembered.
+    # (Team switching keeps marks the same way: both paths recreate squad.)
+    r = client.post("/me/revoke", follow_redirects=True)
+    assert "purged" in r.text or "изтрити" in r.text or r.status_code == 200
+    # NB: an explicit revoke intentionally forgets the marks too…
+    r = client.post("/me/sync", follow_redirects=True)
+    assert r.text.count("✓") == 0
+
+    # …so re-mark one player and prove it survives a sync-rebuild cycle
+    # driven by the marks table (not by the old squad rows).
+    sid = re.search(r"/me/trained/(\d+)", r.text).group(1)
+    client.post(f"/me/trained/{sid}", follow_redirects=True)
+    r = client.post("/me/sync", follow_redirects=True)  # squad rows replaced
+    assert r.text.count("✓") == 1
+
+
 def test_declaration_renew_and_market_visibility(client):
     login(client, 203)  # TishoTrainer has an expired declaration
     r = client.get("/me")

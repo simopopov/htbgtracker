@@ -137,6 +137,9 @@ def me_revoke(request: Request, db: Session = Depends(get_db)):
         for claim in db.query(models.Claim).filter(models.Claim.trainer_profile_id == profile.id).all():
             claim.trainer_profile_id = None
         db.delete(profile)
+    # Explicit purge also forgets the trained-slot marks (unlike a team
+    # switch, which keeps them).
+    db.query(models.TrainedMark).filter(models.TrainedMark.user_id == user.id).delete()
     db.commit()
     security.flash(request, "fl_revoked")
     return RedirectResponse("/me", status_code=303)
@@ -150,6 +153,20 @@ def toggle_trained(request: Request, sp_id: int, db: Session = Depends(get_db)):
     sp = db.get(models.SquadPlayer, sp_id)
     if sp is not None and user.trainer_profile is not None and sp.profile_id == user.trainer_profile.id:
         sp.in_trained_position = not sp.in_trained_position
+        # Mirror the flag into the durable per-user marks so it survives
+        # team switches and re-syncs.
+        mark = (
+            db.query(models.TrainedMark)
+            .filter(
+                models.TrainedMark.user_id == user.id,
+                models.TrainedMark.ht_player_id == sp.ht_player_id,
+            )
+            .first()
+        )
+        if sp.in_trained_position and mark is None:
+            db.add(models.TrainedMark(user_id=user.id, ht_player_id=sp.ht_player_id))
+        elif not sp.in_trained_position and mark is not None:
+            db.delete(mark)
         db.commit()
     return RedirectResponse("/me", status_code=303)
 
